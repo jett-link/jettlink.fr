@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f3552">
+<meta name="robots" content="noindex,nofollow">
+<title>Suivi de colis | JETT LINK</title>
+<style>
+:root{--navy:#0f3552;--blue:#2679a9;--ice:#e9f4fa;--bg:#f4f7f9;--text:#183246;--muted:#718596;--line:#dce6ec;--green:#247a66}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,Arial,sans-serif}
+header{background:var(--navy);color:white;padding:18px 24px}.brand{font-size:21px;font-weight:900;letter-spacing:-.6px}.brand span{color:#8cc8e5}.sub{font-size:10px;letter-spacing:1.5px;color:#b8d1df;font-weight:700}
+main{max-width:680px;margin:42px auto;padding:0 18px 50px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 12px 35px #1832460d}
+.eyebrow{font-size:10px;letter-spacing:1.6px;color:var(--blue);font-weight:850}.ref{font-size:21px;font-weight:900;color:var(--navy);overflow-wrap:anywhere;margin:8px 0 18px}
+.status{display:inline-block;border-radius:30px;background:var(--ice);color:var(--navy);padding:8px 13px;font-size:13px;font-weight:800}
+h1{font-size:27px;color:var(--navy);margin:5px 0 8px}h2{font-size:17px;color:var(--navy);margin:28px 0 12px}
+.muted{color:var(--muted);font-size:13px}.timeline{display:grid;gap:0}.event{position:relative;padding:0 0 19px 27px;border-left:2px solid var(--line);margin-left:7px}.event:last-child{border-left-color:transparent;padding-bottom:0}.dot{position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--blue);border:2px solid white;box-shadow:0 0 0 1px var(--blue)}.event strong{display:block;color:var(--navy);font-size:13px}.event time{font-size:11px;color:var(--muted)}
+.message{padding:14px;border-radius:10px;background:var(--ice);color:#315b73;font-size:13px}.error{background:#fff0ed;color:#a63c2c}
+footer{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}
+@media(max-width:520px){main{margin:24px auto}.card{padding:21px}.ref{font-size:18px}}
+</style>
+</head>
+<body>
+<header><div class="brand">JETT <span>LINK</span></div><div class="sub">SUIVI DE COLIS</div></header>
+<main><section class="card" aria-live="polite">
+<div class="eyebrow">SUIVI DE VOTRE ENVOI</div>
+<h1>Votre colis JETT LINK</h1>
+<div id="content"><p class="message">Recherche de votre colis…</p></div>
+</section><footer>JETT LINK · Informations de suivi</footer></main>
+<script>
+(()=>{
+ const $=id=>document.getElementById(id);
+ const labels={received:'Reçu à Izon',stored:'En stockage',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
+ const ref=new URLSearchParams(location.search).get('ref')||'';
+ const valid=/^JL-\\d{8}-[A-F0-9]{8}$/i.test(ref);
+ const date=v=>v?new Intl.DateTimeFormat('fr-FR',{dateStyle:'long',timeStyle:'short'}).format(new Date(v)):'';
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function load(){
+  if(!valid){$('content').innerHTML='<p class="message error">Le numéro de suivi est absent ou invalide. Vérifiez votre QR code.</p>';return;}
+  try{
+   const response=await fetch('https://uysplffdmchiahewecds.supabase.co/functions/v1/track-parcel?ref='+encodeURIComponent(ref),{method:'GET',cache:'no-store'});
+   const result=await response.json().catch(()=>({}));
+   if(response.status===404){$('content').innerHTML='<p class="message error">Aucun colis ne correspond à ce numéro de suivi.</p>';return;}
+   if(!response.ok||!result.ok)throw new Error();
+   const status=labels[result.parcel.status]||'Statut en cours de mise à jour';
+   const events=(result.events||[]).map(e=>'<div class="event"><span class="dot"></span><strong>'+esc(labels[e.event_type]||'Mise à jour du colis')+'</strong><time>'+esc(date(e.created_at))+'</time></div>').join('');
+   $('content').innerHTML='<div class="eyebrow">NUMÉRO DE SUIVI</div><div class="ref">'+esc(result.parcel.reference)+'</div><span class="status">'+esc(status)+'</span><p class="muted">Dernière mise à jour : '+esc(date(result.parcel.updated_at||result.parcel.received_at))+'</p><h2>Étapes de votre colis</h2><div class="timeline">'+(events||'<p class="muted">Aucune étape supplémentaire pour le moment.</p>')+'</div>';
+  }catch{$('content').innerHTML='<p class="message error">Le suivi est momentanément indisponible. Veuillez réessayer dans quelques instants.</p>';}
+ }
+ load();
+})();
+</script>
+</body>
+</html>
