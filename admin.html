@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f3552">
+<title>Administration | JETT LINK</title>
+<style>
+:root{--navy:#0f3552;--navy2:#09283f;--blue:#2679a9;--ice:#e9f4fa;--bg:#f4f7f9;--text:#183246;--muted:#718596;--line:#dce6ec;--red:#b94b38;--green:#247a66}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}.top{background:var(--navy);color:white;padding:17px 26px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-size:20px;font-weight:850;letter-spacing:-.7px}.brand span{color:#8cc8e5}.top small{display:block;color:#b8d1df;font-size:10px;letter-spacing:1.4px;font-weight:700}.top-actions{display:flex;align-items:center;gap:12px}.who{font-size:12px;color:#d4e5ee}.btn{border:0;border-radius:8px;padding:11px 16px;font-weight:750;background:var(--navy);color:#fff}.btn:hover{filter:brightness(1.1)}.btn.blue{background:var(--blue)}.btn.light{background:#eaf2f6;color:var(--navy)}.btn.red{background:#fff0ed;color:#a63c2c}.btn.small{padding:7px 10px;font-size:12px}.wrap{max-width:1250px;margin:0 auto;padding:28px 24px 60px}.login{max-width:440px;margin:9vh auto;background:white;border:1px solid var(--line);border-radius:16px;padding:36px;box-shadow:0 18px 55px #18324612}.login h1{font-size:28px;margin:8px 0;color:var(--navy)}.login p{color:var(--muted);line-height:1.7}.eyebrow{font-size:10px;letter-spacing:1.7px;color:var(--blue);font-weight:850}.field{display:grid;gap:7px;margin:17px 0}.field label{font-weight:750;font-size:12px}.field input,.field select,.field textarea,.search{width:100%;border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff;color:var(--text);outline:none}.field input:focus,.field select:focus,.field textarea:focus,.search:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2679a91a}.note{font-size:12px;color:var(--muted);margin-top:14px;min-height:20px}.notice{padding:12px 14px;background:#edf6fa;border:1px solid #d5e8f1;border-radius:9px;color:#315b73;font-size:12px;margin:16px 0}.headrow{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:22px}.headrow h1{font-size:29px;letter-spacing:-1px;color:var(--navy);margin:3px 0}.headrow p{margin:0;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 24px}.stat{background:white;border:1px solid var(--line);border-radius:12px;padding:18px}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:700}.stat strong{display:block;color:var(--navy);font-size:28px;margin-top:6px}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0}.tab{border:1px solid var(--line);background:white;color:#587083;border-radius:8px;padding:10px 14px;font-weight:750}.tab.active{background:var(--navy);border-color:var(--navy);color:white}.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:21px;margin-bottom:18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}.panel h2{font-size:17px;color:var(--navy);margin:0}.tools{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.search{max-width:290px;padding:9px 12px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th{text-align:left;color:#7890a0;font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:11px 10px;border-bottom:1px solid var(--line)}td{padding:13px 10px;border-bottom:1px solid #edf1f4;font-size:12px;vertical-align:middle}tr:last-child td{border-bottom:0}.ref{font-weight:850;color:var(--navy);letter-spacing:.3px}.muted{color:var(--muted)}.status{display:inline-block;border-radius:20px;padding:5px 9px;background:#eaf2f6;color:#315b73;font-size:10px;font-weight:800;white-space:nowrap}.status.shipped,.status.picked_up{background:#e7f4ef;color:#247a66}.status.awaiting_decision,.status.returned{background:#fff1e7;color:#a45b27}.status.ready_to_ship{background:#eaf0ff;color:#465da8}.rowactions{display:flex;gap:6px;align-items:center}.rowactions select{max-width:145px;padding:7px;border:1px solid var(--line);border-radius:7px;background:white;font-size:11px}.empty{text-align:center;color:var(--muted);padding:35px 10px}.gridform{display:grid;grid-template-columns:repeat(2,1fr);gap:0 15px}.gridform .full{grid-column:1/-1}.dimgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.split{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.helper{font-size:11px;color:var(--muted);line-height:1.6}.customer-list{display:grid;gap:10px}.customer{padding:12px 14px;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;gap:15px}.customer strong{display:block;color:var(--navy)}.toast{position:fixed;right:20px;bottom:20px;background:var(--navy);color:white;padding:13px 18px;border-radius:9px;box-shadow:0 8px 30px #0002;z-index:10;max-width:340px}.labelstage{position:fixed;left:-10000px;top:0}.printlabel{width:90mm;min-height:55mm;border:1px solid #ccc;padding:5mm;display:grid;grid-template-columns:1fr 27mm;gap:4mm;align-items:center;color:#102d42;background:#fff}.printlabel .labelbrand{font-size:14pt;font-weight:900;letter-spacing:.5px}.printlabel .labelref{font-size:15pt;font-weight:900;margin:4mm 0 2mm}.printlabel .labelsmall{font-size:8pt;line-height:1.4}.printlabel .qr{width:27mm;height:27mm}.printlabel .qr img,.printlabel .qr canvas{width:27mm!important;height:27mm!important}.printlabel .label-foot{font-size:7pt;color:#536c7e;margin-top:3mm;border-top:1px solid #d5e0e7;padding-top:2mm}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.top{padding:14px 16px}.who{display:none}.wrap{padding:22px 14px 45px}.headrow{align-items:flex-start;flex-direction:column}.dimgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.login{margin:5vh 14px;padding:25px}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:24px}.gridform{grid-template-columns:1fr}.gridform .full{grid-column:auto}.panel{padding:15px}.brand{font-size:17px}}
+@media print{body *{visibility:hidden!important}.labelstage,.labelstage *{visibility:visible!important}.labelstage{position:absolute;left:0;top:0;width:100%;}.printlabel{border:0;margin:0;page-break-inside:avoid}@page{size:100mm 65mm;margin:3mm}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="brand">JETT <span>LINK</span><small>ESPACE ADMINISTRATEUR</small></div>
+ <div class="top-actions"><span class="who" id="who"></span><button class="btn light small hidden" id="logout">Déconnexion</button></div>
+</header>
+<main id="loginView" class="login">
+ <div class="eyebrow">ACCÈS SÉCURISÉ</div><h1>Administration</h1>
+ <p>Connecte-toi avec l’adresse e-mail autorisée pour gérer les clients et les colis JETT LINK.</p>
+ <form id="loginForm">
+  <div class="field"><label for="email">Adresse e-mail administrateur</label><input id="email" type="email" value="jettlink@yahoo.com" autocomplete="email" required></div>
+  <button class="btn blue" type="submit" style="width:100%">Recevoir mon lien de connexion</button>
+ </form>
+ <div id="loginMsg" class="note" aria-live="polite"></div>
+ <div class="notice">Un lien sécurisé sera envoyé à cette adresse. Seule l’adresse autorisée peut ouvrir cet espace.</div>
+</main>
+<main id="appView" class="wrap hidden">
+ <div class="headrow"><div><div class="eyebrow">VUE D’ENSEMBLE</div><h1>Tableau de bord</h1><p>Gestion opérationnelle des colis et des clients</p></div><button class="btn blue" id="newParcelBtn">＋ Enregistrer un colis</button></div>
+ <section class="stats">
+  <div class="stat"><span>Colis enregistrés</span><strong id="statTotal">0</strong></div>
+  <div class="stat"><span>Reçus à Izon</span><strong id="statReceived">0</strong></div>
+  <div class="stat"><span>À traiter</span><strong id="statWaiting">0</strong></div>
+  <div class="stat"><span>Expédiés</span><strong id="statShipped">0</strong></div>
+ </section>
+ <nav class="tabs">
+  <button class="tab active" data-tab="parcels">Colis</button>
+  <button class="tab" data-tab="customers">Clients</button>
+  <button class="tab" data-tab="add">＋ Nouveau colis</button>
+ </nav>
+ <section id="parcelsTab" class="panel">
+  <div class="panel-head"><h2>Suivi des colis</h2><div class="tools"><input class="search" id="parcelSearch" placeholder="Rechercher un colis, client, référence…"><button class="btn light small" id="refresh">Actualiser</button></div></div>
+  <div class="tablewrap"><table><thead><tr><th>Référence</th><th>Client</th><th>Colis</th><th>Réception</th><th>Statut</th><th>Action</th></tr></thead><tbody id="parcelRows"></tbody></table></div>
+  <div id="parcelEmpty" class="empty hidden">Aucun colis enregistré pour le moment.</div>
+ </section>
+ <section id="customersTab" class="panel hidden">
+  <div class="panel-head"><h2>Clients enregistrés</h2><span class="muted" id="customerCount"></span></div>
+  <div id="customerRows" class="customer-list"></div>
+  <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
+  <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
+ </section>
+ <section id="addTab" class="panel hidden">
+  <div class="panel-head"><div><h2>Enregistrer un colis reçu à Izon</h2><p class="helper">Une référence unique et un QR code seront créés automatiquement.</p></div></div>
+  <form id="parcelForm">
+   <div class="gridform">
+    <div class="field"><label for="clientName">Nom du client *</label><input id="clientName" required maxlength="120" placeholder="Nom et prénom"></div>
+    <div class="field"><label for="clientEmail">E-mail du client *</label><input id="clientEmail" type="email" required maxlength="254" placeholder="client@email.com"></div>
+    <div class="field"><label for="clientPhone">Téléphone</label><input id="clientPhone" maxlength="50" placeholder="+33…"></div>
+    <div class="field"><label for="senderTracking">N° de suivi du vendeur</label><input id="senderTracking" maxlength="120" placeholder="Facultatif"></div>
+    <div class="field full"><label for="description">Description du colis *</label><input id="description" required maxlength="300" placeholder="Ex. : carton, micro-ondes, vêtements…"></div>
+   </div>
+   <div class="eyebrow" style="margin:8px 0">DIMENSIONS ET POIDS (FACULTATIF)</div>
+   <div class="dimgrid">
+    <div class="field"><label for="weight">Poids (kg)</label><input id="weight" type="number" min="0" step="0.01"></div>
+    <div class="field"><label for="length">Longueur (cm)</label><input id="length" type="number" min="0" step="0.01"></div>
+    <div class="field"><label for="width">Largeur (cm)</label><input id="width" type="number" min="0" step="0.01"></div>
+    <div class="field"><label for="height">Hauteur (cm)</label><input id="height" type="number" min="0" step="0.01"></div>
+   </div>
+   <button class="btn blue" type="submit">Enregistrer le colis et créer son QR</button>
+   <div class="note" id="parcelMsg" aria-live="polite"></div>
+  </form>
+ </section>
+ <section class="panel">
+  <div class="panel-head"><h2>À retenir</h2></div>
+  <p class="helper">Après réception physique du colis à Izon, enregistre-le ici, imprime son étiquette QR et colle-la sur le colis. Le QR sert d’identifiant interne JETT LINK. Le scan caméra et les notifications automatiques aux clients ne sont pas encore activés dans cette première version.</p>
+ </section>
+</main>
+<div id="labelStage" class="labelstage"><div class="printlabel"><div><div class="labelbrand">JETT LINK</div><div class="labelsmall">COLIS RÉCEPTIONNÉ À IZON</div><div id="labelRef" class="labelref"></div><div id="labelName" class="labelsmall"></div><div id="labelDesc" class="labelsmall"></div><div class="label-foot">Conserver cette étiquette sur le colis</div></div><div id="labelQr" class="qr"></div></div></div>
+<div id="toast" class="toast hidden" role="status"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+ const SUPABASE_URL='https://uysplffdmchiahewecds.supabase.co';
+ const SUPABASE_KEY='sb_publishable_ky-VAWZ1vkRKfmPt7W3b_A_rII9fGw4';
+ const ADMIN_EMAIL='jettlink@yahoo.com';
+ const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ const $=id=>document.getElementById(id);
+ let parcels=[],customers=[];
+ const statusLabels={received:'Reçu à Izon',stored:'En stockage',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
+ function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
+ function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));}
+ document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+ $('newParcelBtn').onclick=()=>showTab('add');
+ $('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()};
+ $('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const email=$('email').value.trim().toLowerCase();$('loginMsg').textContent='Envoi du lien sécurisé…';
+  if(email!==ADMIN_EMAIL){$('loginMsg').textContent='Cette adresse e-mail n’est pas autorisée.';return}
+  const {error}=await supabase.auth.signInWithOtp({email:ADMIN_EMAIL,options:{emailRedirectTo:location.origin+'/admin',shouldCreateUser:true}});
+  $('loginMsg').textContent=error?'Erreur : '+error.message:'Lien envoyé. Consulte la boîte de réception Yahoo (et les courriers indésirables).';
+ });
+ async function guard(){
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');return}
+  const email=(session.user.email||'').toLowerCase();
+  if(email!==ADMIN_EMAIL){await supabase.auth.signOut();$('loginMsg').textContent='Accès refusé : adresse non autorisée.';$('loginView').classList.remove('hidden');return}
+  $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('logout').classList.remove('hidden');$('who').textContent=email;
+  await loadData();
+ }
+ supabase.auth.onAuthStateChange(()=>{setTimeout(guard,0)});
+ async function loadData(){
+  const [p,c]=await Promise.all([
+   supabase.from('admin_parcels').select('*').order('created_at',{ascending:false}).limit(500),
+   supabase.from('customers').select('id,first_name,last_name,email,phone,address,created_at').order('created_at',{ascending:false}).limit(500)
+  ]);
+  if(p.error){toast('Chargement des colis impossible : '+p.error.message);return}
+  parcels=p.data||[];customers=c.error?[]:(c.data||[]);
+  render();
+ }
+ function render(){
+  $('statTotal').textContent=parcels.length;
+  $('statReceived').textContent=parcels.filter(x=>['received','stored'].includes(x.status)).length;
+  $('statWaiting').textContent=parcels.filter(x=>['awaiting_decision','returned'].includes(x.status)).length;
+  $('statShipped').textContent=parcels.filter(x=>x.status==='shipped').length;
+  const q=$('parcelSearch').value.trim().toLowerCase();
+  const shown=parcels.filter(x=>[x.reference,x.customer_name,x.customer_email,x.description,x.sender_tracking].join(' ').toLowerCase().includes(q));
+  $('parcelRows').innerHTML=shown.map(x=>'<tr><td><span class="ref">'+esc(x.reference)+'</span><br><span class="muted">'+esc(x.customer_email)+'</span></td><td>'+esc(x.customer_name)+'<br><span class="muted">'+esc(x.customer_phone||'')+'</span></td><td>'+esc(x.description)+'</td><td>'+new Date(x.received_at).toLocaleDateString('fr-FR')+'</td><td><span class="status '+esc(x.status)+'">'+(statusLabels[x.status]||esc(x.status))+'</span></td><td><div class="rowactions"><select aria-label="Modifier le statut" data-status="'+x.id+'">'+Object.keys(statusLabels).map(k=>'<option value="'+k+'" '+(x.status===k?'selected':'')+'>'+statusLabels[k]+'</option>').join('')+'</select><button class="btn light small" data-label="'+x.id+'">Étiquette</button></div></td></tr>').join('');
+  $('parcelEmpty').classList.toggle('hidden',shown.length>0);
+  $('customerCount').textContent=customers.length+' client(s)';
+  $('customerRows').innerHTML=customers.map(x=>'<div class="customer"><div><strong>'+esc([x.first_name,x.last_name].filter(Boolean).join(' '))+'</strong><span class="muted">'+esc(x.email||'')+'</span><br><span class="muted">'+esc(x.phone||'')+'</span></div><span class="muted">'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</span></div>').join('');
+  $('customerEmpty').classList.toggle('hidden',customers.length>0);
+  document.querySelectorAll('[data-status]').forEach(el=>el.addEventListener('change',()=>changeStatus(el.dataset.status,el.value)));
+  document.querySelectorAll('[data-label]').forEach(el=>el.addEventListener('click',()=>printLabel(parcels.find(x=>x.id===el.dataset.label))));
+ }
+ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ $('parcelSearch').addEventListener('input',render);
+ $('refresh').onclick=loadData;
+ async function changeStatus(id,status){
+  const p=parcels.find(x=>x.id===id);if(!p)return;
+  const {error}=await supabase.from('admin_parcels').update({status:status,updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('Modification impossible : '+error.message);return}
+  const event=await supabase.from('admin_parcel_events').insert({parcel_id:id,event_type:status,note:'Statut modifié : '+statusLabels[status]});
+  if(event.error)toast('Statut modifié, mais historique non enregistré.');
+  else toast('Statut mis à jour.');
+  await loadData();
+ }
+ $('parcelForm').addEventListener('submit',async e=>{
+  e.preventDefault();const btn=e.submitter;btn.disabled=true;$('parcelMsg').textContent='Enregistrement en cours…';
+  const num=id=>$(id).value.trim()===''?null:Number($(id).value);
+  const payload={customer_name:$('clientName').value.trim(),customer_email:$('clientEmail').value.trim().toLowerCase(),customer_phone:$('clientPhone').value.trim()||null,sender_tracking:$('senderTracking').value.trim()||null,description:$('description').value.trim(),weight_kg:num('weight'),length_cm:num('length'),width_cm:num('width'),height_cm:num('height'),status:'received'};
+  const {data,error}=await supabase.from('admin_parcels').insert(payload).select().single();
+  if(error){$('parcelMsg').textContent='Erreur : '+error.message;btn.disabled=false;return}
+  const event=await supabase.from('admin_parcel_events').insert({parcel_id:data.id,event_type:'received',note:'Colis réceptionné à Izon'});
+  if(event.error)toast('Colis enregistré. Historique indisponible.');
+  $('parcelForm').reset();$('parcelMsg').textContent='Colis enregistré : '+data.reference;
+  await loadData();showTab('parcels');printLabel(data);btn.disabled=false;
+ });
+ function printLabel(p){
+  if(!p)return;
+  $('labelRef').textContent=p.reference;$('labelName').textContent='Client : '+p.customer_name;$('labelDesc').textContent=p.description;
+  $('labelQr').innerHTML='';
+  if(!window.QRCode){toast('Le générateur QR ne s’est pas chargé.');return}
+  new QRCode($('labelQr'),{text:p.reference,width:220,height:220,colorDark:'#0f3552',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  setTimeout(()=>window.print(),350);
+ }
+ guard();
+})();
+</script>
+</body>
+</html>
