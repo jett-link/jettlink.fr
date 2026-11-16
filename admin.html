@@ -164,7 +164,7 @@
   $('labelRef').textContent=p.reference;$('labelName').textContent='Client : '+p.customer_name;$('labelDesc').textContent=p.description;
   $('labelQr').innerHTML='';
   if(!window.QRCode){toast('Le générateur QR ne s’est pas chargé.');return}
-  new QRCode($('labelQr'),{text:p.reference,width:220,height:220,colorDark:'#0f3552',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  new QRCode($('labelQr'),{text:location.origin+'/suivi?ref='+encodeURIComponent(p.reference),width:220,height:220,colorDark:'#0f3552',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
   setTimeout(()=>window.print(),350);
  }
  guard();
