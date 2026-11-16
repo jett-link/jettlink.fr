@@ -32,7 +32,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin-top:20px}
  const $=id=>document.getElementById(id);
  const labels={received:'Reçu à Izon',stored:'En stockage',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
  const ref=new URLSearchParams(location.search).get('ref')||'';
- const valid=/^JL-\\d{8}-[A-F0-9]{8}$/i.test(ref);
+ const valid=/^JL-\d{8}-[A-F0-9]{8}$/i.test(ref);
  const date=v=>v?new Intl.DateTimeFormat('fr-FR',{dateStyle:'long',timeStyle:'short'}).format(new Date(v)):'';
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  async function load(){
