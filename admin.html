@@ -50,6 +50,7 @@
  </section>
  <section id="customersTab" class="panel hidden">
   <div class="panel-head"><h2>Clients enregistrés</h2><div class="tools"><span class="muted" id="customerCount"></span><input class="search" id="customerSearch" placeholder="Rechercher un nom, prénom ou e-mail…"></div></div>
+  <div id="customerLoadError" class="notice" role="alert"></div>
   <div id="customerRows" class="customer-list"></div>
   <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
   <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
@@ -126,7 +127,8 @@
    supabase.from('customers').select('id,first_name,last_name,email,phone,address,created_at').order('created_at',{ascending:false}).limit(500)
   ]);
   if(p.error){toast('Chargement des colis impossible : '+p.error.message);return}
-  parcels=p.data||[];customers=c.error?[]:(c.data||[]);
+  parcels=p.data||[];customers=c.data||[];
+  $('customerLoadError').textContent=c.error?'Impossible de charger les clients : '+c.error.message:'';
   render();
  }
  function render(){
@@ -136,7 +138,7 @@
   $('statShipped').textContent=parcels.filter(x=>x.status==='shipped').length;
   const q=$('parcelSearch').value.trim().toLowerCase();
   const shown=parcels.filter(x=>[x.reference,x.customer_name,x.customer_email,x.description,x.sender_tracking].join(' ').toLowerCase().includes(q));
-  $('parcelRows').innerHTML=shown.map(x=>'<tr><td><span class="ref">'+esc(x.reference)+'</span><br><span class="muted">'+esc(x.customer_email)+'</span></td><td>'+esc(x.customer_name)+'<br><span class="muted">'+esc(x.customer_phone||'')+'</span></td><td>'+esc(x.description)+'</td><td>'+new Date(x.received_at).toLocaleDateString('fr-FR')+'</td><td><span class="status '+esc(x.status)+'">'+(statusLabels[x.status]||esc(x.status))+'</span></td><td><div class="rowactions"><select aria-label="Modifier le statut" data-status="'+x.id+'">'+Object.keys(statusLabels).map(k=>'<option value="'+k+'" '+(x.status===k?'selected':'')+'>'+statusLabels[k]+'</option>').join('')+'</select><button class="btn light small" data-label="'+x.id+'">Étiquette</button></div></td></tr>').join('');
+  $('parcelRows').innerHTML=shown.map(x=>'<tr><td><span class="ref">'+esc(x.reference)+'</span><br><span class="muted">'+esc(x.customer_email)+'</span></td><td>'+esc(x.customer_name)+'<br><span class="muted">'+esc(x.customer_phone||'')+'</span></td><td>'+esc(x.description)+'</td><td>'+(x.status==='stored'?'Pas encore reçu':(x.received_at?new Date(x.received_at).toLocaleDateString('fr-FR'):'—'))+'</td><td><span class="status '+esc(x.status)+'">'+(statusLabels[x.status]||esc(x.status))+'</span></td><td><div class="rowactions"><select aria-label="Modifier le statut" data-status="'+x.id+'">'+Object.keys(statusLabels).map(k=>'<option value="'+k+'" '+(x.status===k?'selected':'')+'>'+statusLabels[k]+'</option>').join('')+'</select><button class="btn light small" data-label="'+x.id+'">Étiquette</button></div></td></tr>').join('');
   $('parcelEmpty').classList.toggle('hidden',shown.length>0);
   const customerQuery=$('customerSearch').value.trim().toLowerCase();
   const customerShown=customers.filter(x=>[x.first_name,x.last_name,x.email,x.phone].join(' ').toLowerCase().includes(customerQuery));
