@@ -470,7 +470,21 @@ html{scroll-padding-top:98px}
 .account-timeline small{color:#7b97a9;font-size:10px}
 .account-timeline p{margin:4px 0;font-size:11px;color:#4b748c}
 
-</style></head>
+</style>
+<style id="jettlink-size-format-visuals">
+/* Remplacement temporaire des photos répétées par des repères de gabarit distincts. */
+#catalog-chips .catalog-size-chip{width:min(100%,190px);min-height:166px;display:inline-flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;padding:10px;border-radius:16px;white-space:normal;text-align:left}
+#catalog-chips .catalog-size-chip .catalog-size-visual{height:104px;width:100%;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(145deg,#f3f7f9,#e6eef2);overflow:hidden}
+#catalog-chips .catalog-size-chip .catalog-size-box{position:relative;display:block;box-sizing:border-box;border:2px solid #55788d;border-radius:4px;background:linear-gradient(145deg,#fff,#dce8ee);box-shadow:0 5px 10px rgba(18,58,86,.12)}
+#catalog-chips .catalog-size-chip .catalog-size-box:before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:5px;transform:translateX(-50%);background:rgba(85,120,141,.22);border-left:1px solid #55788d;border-right:1px solid #55788d}
+#catalog-chips .catalog-size-chip .catalog-size-visual[data-size="small"] .catalog-size-box{width:34px;height:30px}
+#catalog-chips .catalog-size-chip .catalog-size-visual[data-size="medium"] .catalog-size-box{width:56px;height:46px}
+#catalog-chips .catalog-size-chip .catalog-size-visual[data-size="large"] .catalog-size-box{width:78px;height:64px}
+#catalog-chips .catalog-size-chip .catalog-size-visual[data-size="standard"] .catalog-size-box{width:56px;height:46px}
+#catalog-chips .catalog-size-chip .catalog-size-title{font-size:14px;font-weight:700}
+@media(max-width:560px){#catalog-chips .catalog-size-chip{width:calc(50% - 10px);min-height:158px}#catalog-chips .catalog-size-chip .catalog-size-visual{height:96px}}
+</style>
+</head>
 <body data-version="5.0">
 <a class="skip-link" data-t="skip" href="#main">Aller au contenu</a>
 <header class="header" id="haut">
@@ -1537,8 +1551,8 @@ html{scroll-padding-top:98px}
     const o=document.createElement('option');o.value=it.id;sel.append(o);
     const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):'';
     const b=chip('',it.id);b.classList.add('catalog-size-chip');
-    if(it.image_url){const im=document.createElement('img');im.src=it.image_url;im.alt=baseLabelFor(it);im.loading='eager';im.className='catalog-option-image';im.onerror=()=>{im.remove();const fallback=document.createElement('span');fallback.className='catalog-option-image catalog-product-placeholder';fallback.textContent='Photo indisponible';b.prepend(fallback);};b.append(im);}
-    else {const im=document.createElement('span');im.className='catalog-option-image catalog-product-placeholder';im.textContent='Photo indisponible';b.append(im);}
+    const visual=document.createElement('div');visual.className='catalog-size-visual';visual.dataset.size=it.size_code||'standard';visual.setAttribute('aria-hidden','true');
+    const carton=document.createElement('span');carton.className='catalog-size-box';visual.append(carton);b.append(visual);
     const title=document.createElement('span');title.className='catalog-size-title';title.textContent=size||baseLabelFor(it);b.append(title);
     chips.append(b);
    });
