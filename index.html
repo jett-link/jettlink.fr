@@ -492,6 +492,18 @@ html{scroll-padding-top:98px}
 #catalog-note{font-weight:600;color:#315c76}
 @media(max-width:560px){#catalog-chips{gap:8px}#catalog-chips .catalog-size-chip{width:auto;min-width:calc(33.333% - 8px);min-height:64px;padding:10px 8px;margin:0}#catalog-chips .catalog-size-chip .catalog-size-title{font-size:14px}#catalog-chips .catalog-size-chip .catalog-size-price{font-size:13px}}
 </style>
+<style id="catalog-clear-three-step-layout">
+#catalog-chips{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));align-items:stretch;gap:10px}
+#catalog-chips .catalog-stage-heading{grid-column:1/-1;width:100%;margin:8px 0 2px;padding:10px 12px;border-left:4px solid #1b6689;background:#edf6fa;color:#123a56;font-weight:800;font-size:14px;line-height:1.4}
+#catalog-chips .catalog-category-chip,#catalog-chips .catalog-product-button,#catalog-chips .catalog-size-chip{width:100%;min-width:0;min-height:58px;margin:0;white-space:normal;overflow-wrap:anywhere}
+#catalog-chips .catalog-size-chip{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:5px!important;padding:10px 6px!important;border:2px solid #6d9db8!important;border-radius:12px!important;background:#f4faff!important}
+#catalog-chips .catalog-size-chip .catalog-size-title{display:block!important;font-size:15px!important;font-weight:900!important}
+#catalog-chips .catalog-size-chip .catalog-size-price{display:block!important;font-size:14px!important;font-weight:900!important}
+#catalog-chips .catalog-chip[aria-pressed="true"]{background:#123a56!important;color:#fff!important;border-color:#123a56!important}
+#catalog-chips .catalog-chip[aria-pressed="true"] .catalog-size-price{color:#fff!important}
+#catalog-chips .catalog-other-chip{grid-column:1/-1}
+@media(max-width:560px){#catalog-chips{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}#catalog-chips .catalog-category-chip,#catalog-chips .catalog-product-button{grid-column:span 1;min-height:60px;padding:9px 6px;font-size:13px}#catalog-chips .catalog-size-chip{min-height:68px!important}}
+</style>
 </head>
 <body data-version="5.0">
 <a class="skip-link" data-t="skip" href="#main">Aller au contenu</a>
@@ -1544,6 +1556,7 @@ html{scroll-padding-top:98px}
   };
   groups.forEach(g=>{if(items.some(i=>i.group_name===g))groupBtn(g);});
   if(activeGroup){
+   const heading=document.createElement('div');heading.className='catalog-stage-heading';heading.textContent=L()==='en'?'Choose an item':L()==='nl'?'Kies een artikel':'Choisissez votre objet';chips.append(heading);
    const arr=items.filter(i=>i.group_name===activeGroup),map=new Map();
    arr.forEach(it=>{const key=it.parent_item_id||it.id;if(!map.has(key))map.set(key,[]);map.get(key).push(it);});
    map.forEach((variants,key)=>{
@@ -1553,6 +1566,7 @@ html{scroll-padding-top:98px}
    });
   }
   if(activeGroup&&activeProduct){
+   const heading=document.createElement('div');heading.className='catalog-stage-heading';heading.textContent=L()==='en'?'Choose a size — price shown on each option':L()==='nl'?'Kies een formaat — prijs op elke optie':'Choisissez le format — prix affiché sur chaque choix';chips.append(heading);
    const variants=items.filter(i=>(i.parent_item_id||i.id)===activeProduct);
    variants.sort((a,b)=>({small:1,medium:2,large:3}[a.size_code]||0)-({small:1,medium:2,large:3}[b.size_code]||0));
    variants.forEach(it=>{
