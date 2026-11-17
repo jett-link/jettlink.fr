@@ -1323,10 +1323,9 @@ html{scroll-padding-top:98px}
     loadPurchaseDeclarations(a.email);
     const nav=$('account-nav');if(nav)nav.textContent=lang()==='en'?'My account':lang()==='nl'?'Mijn account':'Mon compte';
   }
-  async function loadPurchaseDeclarations(email){
+  function loadPurchaseDeclarations(email){
     const box=$('purchase-history-list');if(!box)return;box.replaceChildren();
-    try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations?select=id,seller_name,item_name,category,quantity,size_code,status,created_at&customer_email=eq.'+encodeURIComponent(email)+'&order=created_at.desc',{headers:{apikey:SB_KEY}});
-    if(!r.ok)return;const rows=await r.json();rows.forEach(x=>{const el=document.createElement('div');el.className='account-history-item';const left=document.createElement('div');const strong=document.createElement('strong');strong.textContent=x.item_name+' · '+x.quantity+' exemplaire(s)';const small=document.createElement('small');small.textContent=x.seller_name+' · '+(x.size_code||'Format non précisé');left.append(strong,small);const status=document.createElement('span');status.textContent=x.status==='received'?'Reçu':x.status==='partially_received'?'Partiellement reçu':'Déclaré';el.append(left,status);box.append(el);});}catch{}
+    try{const rows=JSON.parse(localStorage.getItem('jett-purchases-'+email)||'[]');rows.forEach(x=>{const el=document.createElement('div');el.className='account-history-item';const left=document.createElement('div');const strong=document.createElement('strong');strong.textContent=x.item_name+' · '+x.quantity+' exemplaire(s)';const small=document.createElement('small');small.textContent=x.seller_name+' · '+(x.size_code||'Format non précisé');left.append(strong,small);const status=document.createElement('span');status.textContent='Déclaré';el.append(left,status);box.append(el);});}catch{}
   }
   $('purchase-declaration-form')?.addEventListener('submit',async e=>{
     e.preventDefault();const form=e.currentTarget,btn=$('purchase-submit'),msg=$('purchase-feedback');
@@ -1334,7 +1333,7 @@ html{scroll-padding-top:98px}
     if(!form.reportValidity())return;btn.disabled=true;msg.textContent='Enregistrement en cours…';
     const url=$('purchase-url').value.trim();if(url&&!/^https:\/\//i.test(url)){msg.textContent='Le lien doit commencer par https://';btn.disabled=false;return;}
     const payload={customer_email:current.email,seller_name:$('purchase-seller').value.trim(),item_name:$('purchase-item').value.trim(),category:$('purchase-category').value,quantity:Number($('purchase-quantity').value),size_code:$('purchase-size').value||null,model_reference:$('purchase-reference').value.trim()||null,product_url:url||null,notes:$('purchase-notes').value.trim()||null};
-    try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok)throw Error('Enregistrement impossible. Vérifiez les champs puis réessayez.');form.reset();$('purchase-quantity').value='1';msg.textContent='Déclaration enregistrée.';await loadPurchaseDeclarations(current.email);}catch(err){msg.textContent=err.message||t('generic');}finally{btn.disabled=false;}
+    try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok)throw Error('Enregistrement impossible. Vérifiez les champs puis réessayez.');try{const key='jett-purchases-'+current.email,rows=JSON.parse(localStorage.getItem(key)||'[]');rows.unshift({...payload,created_at:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(rows.slice(0,100)));}catch{}form.reset();$('purchase-quantity').value='1';msg.textContent='Déclaration enregistrée.';loadPurchaseDeclarations(current.email);}catch(err){msg.textContent=err.message||t('generic');}finally{btn.disabled=false;}
   });
   async function getAccount(){
     try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');
