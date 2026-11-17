@@ -40,6 +40,7 @@
  <nav class="tabs">
   <button class="tab active" data-tab="parcels">Colis</button>
   <button class="tab" data-tab="customers">Clients</button>
+  <button class="tab" data-tab="purchases">Déclarations d’achats</button>
   <button class="tab" data-tab="scanner">Scanner un colis</button>
   <button class="tab" data-tab="add">＋ Nouveau colis</button>
  </nav>
@@ -54,6 +55,11 @@
   <div id="customerRows" class="customer-list"></div>
   <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
   <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
+ </section>
+ <section id="purchasesTab" class="panel hidden">
+  <div class="panel-head"><div><h2>Déclarations d’achats des clientes</h2><p class="helper">Retrouve le vendeur, les articles, les formats et les références déclarés avant réception.</p></div><button class="btn light small" id="refreshPurchases">Actualiser</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Cliente</th><th>Site / vendeur</th><th>Article déclaré</th><th>Format / quantité</th><th>Référence / lien</th><th>État</th></tr></thead><tbody id="purchaseRows"></tbody></table></div>
+  <div id="purchaseEmpty" class="empty hidden">Aucune déclaration d’achat pour le moment.</div>
  </section>
  <section id="scannerTab" class="panel hidden">
   <div class="panel-head"><div><h2>Scanner un colis</h2><p class="helper">Lecture réservée à l’administrateur connecté. Les informations privées restent dans cet espace.</p></div></div>
@@ -99,10 +105,10 @@
  const ADMIN_EMAIL='jettlink@yahoo.com';
  const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const $=id=>document.getElementById(id);
- let parcels=[],customers=[];
+ let parcels=[],customers=[],purchases=[];
  const statusLabels={received:'Reçu à Izon – client notifié',stored:'Étiquette créée – à scanner',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
  function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
- function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
+ function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','purchases','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
  $('newParcelBtn').onclick=()=>showTab('add');
  $('logout').onclick=async()=>{stopScanner();await supabase.auth.signOut();location.reload()};
@@ -122,16 +128,20 @@
  }
  supabase.auth.onAuthStateChange(()=>{setTimeout(guard,0)});
  async function loadData(){
-  const [p,c]=await Promise.all([
+  const [p,c,d]=await Promise.all([
    supabase.from('admin_parcels').select('*').order('created_at',{ascending:false}).limit(500),
-   supabase.from('customers').select('id,first_name,last_name,email,phone,address,created_at').order('created_at',{ascending:false}).limit(500)
+   supabase.from('customers').select('id,first_name,last_name,email,phone,address,created_at').order('created_at',{ascending:false}).limit(500),
+   supabase.from('purchase_declarations').select('*').order('created_at',{ascending:false}).limit(500)
   ]);
   if(p.error){toast('Chargement des colis impossible : '+p.error.message);return}
-  parcels=p.data||[];customers=c.data||[];
+  parcels=p.data||[];customers=c.data||[];purchases=d.data||[];
+  if(d.error)toast('Déclarations non chargées : '+d.error.message);
   $('customerLoadError').textContent=c.error?'Impossible de charger les clients : '+c.error.message:'';
   render();
  }
  function render(){
+  $('purchaseRows').innerHTML=purchases.map(x=>'<tr><td>'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</td><td>'+esc(x.customer_email)+'</td><td>'+esc(x.seller_name)+'</td><td>'+esc(x.item_name)+'<br><span class="muted">'+esc(x.category)+'</span></td><td>'+esc(x.size_code||'Non précisé')+' · '+esc(x.quantity)+'</td><td>'+esc(x.model_reference||'—')+(x.product_url?'<br><a href="'+esc(x.product_url)+'" target="_blank" rel="noopener">Ouvrir le lien</a>':'')+(x.photo_url?'<br><a href="'+esc(x.photo_url)+'" target="_blank" rel="noopener">Voir la photo</a>':'')+'</td><td>'+esc(x.status)+'</td></tr>').join('');
+  $('purchaseEmpty').classList.toggle('hidden',purchases.length>0);
   $('statTotal').textContent=parcels.length;
   $('statReceived').textContent=parcels.filter(x=>x.status==='received').length;
   $('statWaiting').textContent=parcels.filter(x=>['stored','awaiting_decision','returned'].includes(x.status)).length;
@@ -177,6 +187,7 @@
  $('customerSearch').addEventListener('input',render);
  $('parcelSearch').addEventListener('input',render);
  $('refresh').onclick=loadData;
+ $('refreshPurchases').onclick=loadData;
  async function changeStatus(id,status){
   const p=parcels.find(x=>x.id===id);if(!p)return;
   const {error}=await supabase.from('admin_parcels').update({status:status,updated_at:new Date().toISOString()}).eq('id',id);
