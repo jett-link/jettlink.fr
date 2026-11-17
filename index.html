@@ -1508,7 +1508,7 @@ html{scroll-padding-top:98px}
  const num=v=>new Intl.NumberFormat(L()==='en'?'en-US':L(),{maximumFractionDigits:2}).format(Number(v));
  let items=[];
  const lab=it=>it['label_'+L()]||it.label_fr;
- const cleanProductName=value=>String(value||'').replace(/(?:\\s*[—–-]\\s*|\\s+)(?:petit(?:e)?|moyen(?:ne)?|grand(?:e)?|small|medium|large|klein|mittel|groß|groot|pequeno|pequena|médio|média|grande)\\s*$/i,'').trim();
+ const cleanProductName=value=>String(value||'').replace(/(?:\s*[—–-]\s*|\s+)(?:petit(?:e)?|moyen(?:ne)?|grand(?:e)?|small|medium|large|klein|mittel|groß|groot|pequeno|pequena|médio|média|grande)\s*$/i,'').trim();
  const dims=it=>`${num(it.std_weight_kg)} kg · ${num(it.std_length_cm)} × ${num(it.std_width_cm)} × ${num(it.std_height_cm)} cm`;
  function chip(text,value){const b=document.createElement('button');b.type='button';b.className='catalog-chip';b.dataset.id=value;b.textContent=text;b.setAttribute('aria-pressed',String(sel.value===value));b.addEventListener('click',()=>{sel.value=(value!==''&&sel.value===value)?'':value;apply();});return b;}
  let activeGroup='',activeProduct='';
