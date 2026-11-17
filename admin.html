@@ -41,6 +41,7 @@
   <button class="tab active" data-tab="parcels">Colis</button>
   <button class="tab" data-tab="customers">Clients</button>
   <button class="tab" data-tab="purchases">Déclarations d’achats</button>
+  <button class="tab" data-tab="catalog">Catalogue</button>
   <button class="tab" data-tab="scanner">Scanner un colis</button>
   <button class="tab" data-tab="add">＋ Nouveau colis</button>
  </nav>
@@ -55,6 +56,11 @@
   <div id="customerRows" class="customer-list"></div>
   <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
   <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
+ </section>
+ <section id="catalogTab" class="panel hidden">
+  <div class="panel-head"><div><h2>Gestion du catalogue</h2><p class="helper">Modifie les prix et les dimensions de référence, ajoute une image via son adresse web, ou active/désactive un format.</p></div><button class="btn light small" id="refreshCatalog">Actualiser</button></div>
+  <div class="tablewrap"><table><thead><tr><th>Article / format</th><th>Poids kg</th><th>Longueur</th><th>Largeur</th><th>Hauteur</th><th>Prix €</th><th>Image (URL)</th><th>Actif</th><th></th></tr></thead><tbody id="catalogRows"></tbody></table></div>
+  <div id="catalogEmpty" class="empty hidden">Aucun article dans le catalogue.</div>
  </section>
  <section id="purchasesTab" class="panel hidden">
   <div class="panel-head"><div><h2>Déclarations d’achats des clientes</h2><p class="helper">Retrouve le vendeur, les articles, les formats et les références déclarés avant réception.</p></div><button class="btn light small" id="refreshPurchases">Actualiser</button></div>
@@ -105,10 +111,10 @@
  const ADMIN_EMAIL='jettlink@yahoo.com';
  const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const $=id=>document.getElementById(id);
- let parcels=[],customers=[],purchases=[];
+ let parcels=[],customers=[],purchases=[],catalog=[];
  const statusLabels={received:'Reçu à Izon – client notifié',stored:'Étiquette créée – à scanner',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
  function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
- function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','purchases','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
+ function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','purchases','catalog','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
  $('newParcelBtn').onclick=()=>showTab('add');
  $('logout').onclick=async()=>{stopScanner();await supabase.auth.signOut();location.reload()};
@@ -128,18 +134,24 @@
  }
  supabase.auth.onAuthStateChange(()=>{setTimeout(guard,0)});
  async function loadData(){
-  const [p,c,d]=await Promise.all([
+  const [p,c,d,k]=await Promise.all([
    supabase.from('admin_parcels').select('*').order('created_at',{ascending:false}).limit(500),
    supabase.from('customers').select('id,first_name,last_name,email,phone,address,created_at').order('created_at',{ascending:false}).limit(500),
-   supabase.from('purchase_declarations').select('*').order('created_at',{ascending:false}).limit(500)
+   supabase.from('purchase_declarations').select('*').order('created_at',{ascending:false}).limit(500),
+   supabase.from('catalog_items').select('*').order('sort')
   ]);
   if(p.error){toast('Chargement des colis impossible : '+p.error.message);return}
-  parcels=p.data||[];customers=c.data||[];purchases=d.data||[];
+  parcels=p.data||[];customers=c.data||[];purchases=d.data||[];catalog=k.data||[];
+  if(k.error)toast('Catalogue non chargé : '+k.error.message);
   if(d.error)toast('Déclarations non chargées : '+d.error.message);
   $('customerLoadError').textContent=c.error?'Impossible de charger les clients : '+c.error.message:'';
   render();
  }
  function render(){
+  $('catalogRows').innerHTML=catalog.map(x=>'<tr><td><strong>'+esc(x.label_fr)+'</strong><br><span class="muted">'+esc(x.group_name)+' · '+esc(x.size_code||'format naturel')+'</span></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_weight_kg" data-id="'+esc(x.id)+'" value="'+esc(x.std_weight_kg)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_length_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_length_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_width_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_width_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_height_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_height_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.01" data-field="price_eur" data-id="'+esc(x.id)+'" value="'+esc(x.price_eur)+'"></td><td><input class="catalog-edit" type="url" data-field="image_url" data-id="'+esc(x.id)+'" value="'+esc(x.image_url||'')+'" placeholder="https://…"></td><td><input type="checkbox" data-active="'+esc(x.id)+'" '+(x.active?'checked':'')+' aria-label="Activer '+esc(x.label_fr)+'"></td><td><button class="btn blue small" data-save-catalog="'+esc(x.id)+'">Enregistrer</button></td></tr>').join('');
+  $('catalogEmpty').classList.toggle('hidden',catalog.length>0);
+  document.querySelectorAll('[data-save-catalog]').forEach(btn=>btn.onclick=()=>saveCatalog(btn.dataset.saveCatalog));
+  document.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>saveCatalog(el.dataset.active));
   $('purchaseRows').innerHTML=purchases.map(x=>'<tr><td>'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</td><td>'+esc(x.customer_email)+'</td><td>'+esc(x.seller_name)+'</td><td>'+esc(x.item_name)+'<br><span class="muted">'+esc(x.category)+'</span></td><td>'+esc(x.size_code||'Non précisé')+' · '+esc(x.quantity)+'</td><td>'+esc(x.model_reference||'—')+(x.product_url?'<br><a href="'+esc(x.product_url)+'" target="_blank" rel="noopener">Ouvrir le lien</a>':'')+(x.photo_url?'<br><a href="'+esc(x.photo_url)+'" target="_blank" rel="noopener">Voir la photo</a>':'')+'</td><td>'+esc(x.status)+'</td></tr>').join('');
   $('purchaseEmpty').classList.toggle('hidden',purchases.length>0);
   $('statTotal').textContent=parcels.length;
@@ -188,6 +200,16 @@
  $('parcelSearch').addEventListener('input',render);
  $('refresh').onclick=loadData;
  $('refreshPurchases').onclick=loadData;
+ $('refreshCatalog').onclick=loadData;
+ async function saveCatalog(id){
+  const row=catalog.find(x=>x.id===id);if(!row)return;
+  const payload={};document.querySelectorAll('.catalog-edit[data-id="'+CSS.escape(id)+'"]').forEach(el=>{const key=el.dataset.field;payload[key]=key==='image_url'?(el.value.trim()||null):Number(el.value);});
+  const active=document.querySelector('[data-active="'+CSS.escape(id)+'"]');if(active)payload.active=active.checked;
+  for(const key of ['std_weight_kg','std_length_cm','std_width_cm','std_height_cm','price_eur']){if(!Number.isFinite(payload[key])||payload[key]<=0){toast('Les mesures et le prix doivent être supérieurs à zéro.');return;}}
+  const {error}=await supabase.from('catalog_items').update(payload).eq('id',id);
+  if(error){toast('Modification impossible : '+error.message);return;}
+  Object.assign(row,payload);toast('Catalogue mis à jour.');render();
+ }
  async function changeStatus(id,status){
   const p=parcels.find(x=>x.id===id);if(!p)return;
   const {error}=await supabase.from('admin_parcels').update({status:status,updated_at:new Date().toISOString()}).eq('id',id);
