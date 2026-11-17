@@ -504,6 +504,10 @@ html{scroll-padding-top:98px}
 #catalog-chips .catalog-other-chip{grid-column:1/-1}
 @media(max-width:560px){#catalog-chips{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}#catalog-chips .catalog-category-chip,#catalog-chips .catalog-product-button{grid-column:span 1;min-height:60px;padding:9px 6px;font-size:13px}#catalog-chips .catalog-size-chip{min-height:68px!important}}
 </style>
+<style id="catalog-hide-prices-in-size-bubbles">
+/* Les prix restent calculés dans le récapitulatif, jamais dans les bulles de format. */
+#catalog-chips .catalog-size-chip .catalog-size-price{display:none!important}
+</style>
 </head>
 <body data-version="5.0">
 <a class="skip-link" data-t="skip" href="#main">Aller au contenu</a>
