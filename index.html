@@ -1534,12 +1534,11 @@ html{scroll-padding-top:98px}
    variants.sort((a,b)=>({small:1,medium:2,large:3}[a.size_code]||0)-({small:1,medium:2,large:3}[b.size_code]||0));
    variants.forEach(it=>{
     const o=document.createElement('option');o.value=it.id;sel.append(o);
-    const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):lab(it);
+    const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):'';
     const b=chip('',it.id);b.classList.add('catalog-size-chip');
-    if(it.image_url){const im=document.createElement('img');im.src=it.image_url;im.alt=lab(it);im.loading='lazy';im.className='catalog-option-image';im.onerror=()=>{im.style.display='none';};b.append(im);}
-    else {const im=document.createElement('span');im.className='catalog-option-image catalog-product-placeholder';im.textContent='Image à venir';b.append(im);}
-    const title=document.createElement('span');title.className='catalog-size-title';title.textContent=size+' '+baseLabelFor(it);b.append(title);
-    const price=document.createElement('span');price.className='catalog-size-price';price.textContent=num(it.price_eur)+' €';b.append(price);
+    if(it.image_url){const im=document.createElement('img');im.src=it.image_url;im.alt=baseLabelFor(it);im.loading='eager';im.className='catalog-option-image';im.onerror=()=>{im.remove();const fallback=document.createElement('span');fallback.className='catalog-option-image catalog-product-placeholder';fallback.textContent='Photo indisponible';b.prepend(fallback);};b.append(im);}
+    else {const im=document.createElement('span');im.className='catalog-option-image catalog-product-placeholder';im.textContent='Photo indisponible';b.append(im);}
+    const title=document.createElement('span');title.className='catalog-size-title';title.textContent=size||baseLabelFor(it);b.append(title);
     chips.append(b);
    });
   }
