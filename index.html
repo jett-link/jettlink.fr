@@ -477,6 +477,21 @@ html{scroll-padding-top:98px}
 #catalog-chips .catalog-size-chip .catalog-size-title{font-size:14px;font-weight:700}
 #catalog-chips .catalog-size-chip .catalog-size-visual{display:none}
 </style>
+<style>
+/* Choix de formats clairement visibles, y compris sur mobile */
+#catalog-field{overflow:visible!important;position:relative;z-index:2}
+#catalog-chips{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;overflow:visible!important;margin:12px 0}
+#catalog-chips .catalog-chip{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 16px;border:2px solid #8aaec2;border-radius:12px;background:#fff;color:#123a56;font-weight:800;line-height:1.25;white-space:normal;cursor:pointer;visibility:visible;opacity:1}
+#catalog-chips .catalog-category-chip{background:#eaf3f8}
+#catalog-chips .catalog-size-chip{min-width:108px;flex-direction:column;gap:5px;border-color:#6d9db8;background:#f4faff}
+#catalog-chips .catalog-size-chip .catalog-size-title{font-size:15px;font-weight:900}
+#catalog-chips .catalog-size-chip .catalog-size-price{font-size:14px;font-weight:900;color:#a84c30}
+#catalog-chips .catalog-chip[aria-pressed="true"]{background:#123a56!important;border-color:#123a56!important;color:#fff!important;box-shadow:0 0 0 3px #b9dced}
+#catalog-chips .catalog-chip[aria-pressed="true"] .catalog-size-price{color:#fff}
+#catalog-chips .catalog-other-chip{flex-basis:100%;justify-content:flex-start;border-style:dashed;color:#164e79}
+#catalog-note{font-weight:600;color:#315c76}
+@media(max-width:560px){#catalog-chips{gap:8px}#catalog-chips .catalog-size-chip{width:auto;min-width:calc(33.333% - 8px);min-height:64px;padding:10px 8px;margin:0}#catalog-chips .catalog-size-chip .catalog-size-title{font-size:14px}#catalog-chips .catalog-size-chip .catalog-size-price{font-size:13px}}
+</style>
 </head>
 <body data-version="5.0">
 <a class="skip-link" data-t="skip" href="#main">Aller au contenu</a>
@@ -1509,7 +1524,7 @@ html{scroll-padding-top:98px}
 (()=>{
  const SB='https://uysplffdmchiahewecds.supabase.co',KEY='sb_publishable_ky-VAWZ1vkRKfmPt7W3b_A_rII9fGw4';
  const $=id=>document.getElementById(id);const sel=$('catalog-select'),chips=$('catalog-chips');if(!sel||!chips)return;
- const TX={"fr":{"label":"Qu’est-ce que vous avez acheté ?","other":"Autre colis (je saisis les mesures)","kit":"Meubles en kit","electro":"Électroménager et TV","canape":"Canapés","vetements":"Vêtements","accessoires":"Accessoires","deco":"Décoration","note":"Dimensions et poids estimatifs : {d}. Prix indicatif du format.","fixed":"Prix estimé :","line":"Prix de votre article"},"en":{"label":"What did you buy?","other":"Other parcel (enter measurements)","kit":"Flat-pack furniture","electro":"Appliances and TVs","canape":"Sofas","vetements":"Clothing","accessoires":"Accessories","deco":"Home decor","note":"Estimated size and weight: {d}. Indicative format price.","fixed":"Estimated price:","line":"Item price"},"nl":{"label":"Wat heeft u gekocht?","other":"Ander pakket (maten invullen)","kit":"Meubels in kit","electro":"Huishoudapparaten en tv’s","canape":"Banken","vetements":"Kleding","accessoires":"Accessoires","deco":"Decoratie","note":"Geschatte afmetingen en gewicht: {d}. Richtprijs.","fixed":"Geschatte prijs:","line":"Prijs van uw artikel"},"pt":{"label":"O que comprou?","other":"Outra encomenda (indique as medidas)","kit":"Móveis em kit","electro":"Eletrodomésticos e TV","canape":"Sofás","vetements":"Vestuário","accessoires":"Acessórios","deco":"Decoração","note":"Dimensões e peso estimados: {d}. Preço indicativo.","fixed":"Preço estimado:","line":"Preço do artigo"}};
+ const TX={"fr":{"label":"Qu’est-ce que vous avez acheté ?","other":"Téléphone ou autre colis — saisir les dimensions","kit":"Meubles en kit","electro":"Électroménager et TV","canape":"Canapés","vetements":"Vêtements","accessoires":"Accessoires","deco":"Décoration","note":"Dimensions et poids estimatifs : {d}. Prix indicatif du format.","fixed":"Prix estimé :","line":"Prix de votre article"},"en":{"label":"What did you buy?","other":"Other parcel (enter measurements)","kit":"Flat-pack furniture","electro":"Appliances and TVs","canape":"Sofas","vetements":"Clothing","accessoires":"Accessories","deco":"Home decor","note":"Estimated size and weight: {d}. Indicative format price.","fixed":"Estimated price:","line":"Item price"},"nl":{"label":"Wat heeft u gekocht?","other":"Ander pakket (maten invullen)","kit":"Meubels in kit","electro":"Huishoudapparaten en tv’s","canape":"Banken","vetements":"Kleding","accessoires":"Accessoires","deco":"Decoratie","note":"Geschatte afmetingen en gewicht: {d}. Richtprijs.","fixed":"Geschatte prijs:","line":"Prijs van uw artikel"},"pt":{"label":"O que comprou?","other":"Outra encomenda (indique as medidas)","kit":"Móveis em kit","electro":"Eletrodomésticos e TV","canape":"Sofás","vetements":"Vestuário","accessoires":"Acessórios","deco":"Decoração","note":"Dimensões e peso estimados: {d}. Preço indicativo.","fixed":"Preço estimado:","line":"Preço do artigo"}};
  const L=()=>{const l=window.JettI18n?.lang||'fr';return TX[l]?l:(l==='sr'?'nl':'fr');};
  const tx=k=>TX[L()][k];
  const num=v=>new Intl.NumberFormat(L()==='en'?'en-US':L(),{maximumFractionDigits:2}).format(Number(v));
@@ -1545,6 +1560,7 @@ html{scroll-padding-top:98px}
     const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):'';
     const b=chip('',it.id);b.classList.add('catalog-size-chip');
     const title=document.createElement('span');title.className='catalog-size-title';title.textContent=size||baseLabelFor(it);b.append(title);
+    const price=document.createElement('span');price.className='catalog-size-price';price.textContent=new Intl.NumberFormat(L()==='en'?'en-US':L(),{style:'currency',currency:'EUR'}).format(Number(it.price_eur));b.append(price);
     chips.append(b);
    });
   }
