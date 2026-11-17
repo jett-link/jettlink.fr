@@ -1440,7 +1440,7 @@ html{scroll-padding-top:98px}
     const a=$('price-amount'),c=$('price-caption'),b=$('tariff-band'),r=$('price-breakdown-base');
     if(a)a.textContent=v;if(c)c.textContent=T[0];if(b)b.textContent=m.count+' '+T[1];
     if(r){r.textContent=v;const sp=r.previousElementSibling;if(sp)sp.textContent=T[2];}
-  },summary(){if(!entries.length)return null;let cents=0,custom=false;entries.forEach(e=>{if(e.quote.requiresQuote)custom=true;else cents+=e.quote.priceCents;});return{cents,custom,count:entries.length};},get orderParcels(){return entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item}));},get parcels(){return multiPending?entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item})):[];},clear(){multiPending=false;}};
+  },summary(){if(!entries.length)return null;let cents=0,custom=false;entries.forEach(e=>{if(e.quote.requiresQuote)custom=true;else cents+=e.quote.priceCents;});return{cents,custom,count:entries.length};},get orderParcels(){return entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item}));},get parcels(){return multiPending?entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item})):[];},clear(){entries.length=0;multiPending=false;renderList();}};
   const label=(key,fallback)=>{const s=tr(key);return s===key?fallback:s;};
   function updateSummary(){
     const result=compute(),amount=$('price-breakdown-base');
@@ -1602,7 +1602,7 @@ html{scroll-padding-top:98px}
  }
  window.JettCatalog={fixedText:()=>window.JettCatalogFixed?tx('fixed')+' '+window.JettCatalogFixed.label:'',lineText:()=>window.JettCatalogFixed?tx('line'):''};
  const resetToOther=()=>{if(sel.value!==''){sel.value='';apply();}};
- const resetCatalog=()=>{sel.value='';activeGroup='';activeProduct='';apply();build();};
+ const resetCatalog=()=>{sel.value='';activeGroup='';activeProduct='';window.JettMultiQuote?.clear?.();apply();build();};
  ['weight','length','width','height'].forEach(k=>$(k)?.addEventListener('input',e=>{if(e.isTrusted)resetToOther();}));
  document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>setTimeout(resetToOther,0)));
  $('shipping-calculator')?.addEventListener('reset',()=>setTimeout(resetCatalog,0));
