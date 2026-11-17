@@ -1320,6 +1320,7 @@ html{scroll-padding-top:98px}
       line.append(left,right);historyList.append(line);
     }
     publish(a);
+    loadPurchaseDeclarations(a.email);
     const nav=$('account-nav');if(nav)nav.textContent=lang()==='en'?'My account':lang()==='nl'?'Mijn account':'Mon compte';
   }
   async function loadPurchaseDeclarations(email){
