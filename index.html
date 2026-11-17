@@ -89,6 +89,7 @@
 #catalog-chips .catalog-group{margin:14px 0 6px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.7}
 #catalog-chips .catalog-chip{font:inherit;font-size:15px;margin:0 8px 8px 0;padding:10px 14px;border:1px solid #b9cbd8;border-radius:999px;background:#fff;color:inherit;cursor:pointer}
 #catalog-chips .catalog-chip[aria-pressed="true"]{background:#123a56;border-color:#123a56;color:#fff;font-weight:700}
+.purchase-declaration-form{margin-top:18px;padding:18px;border:1px solid var(--border);border-radius:12px;background:#fff}
 body.catalog-mode .result-weight,body.catalog-mode .weight-compare,body.catalog-mode .formula{display:none!important}
 </style>
 <title>JETT LINK — Vos achats en métropole, vos colis en Guyane</title>
@@ -541,6 +542,22 @@ html{scroll-padding-top:98px}
 <div hidden="" id="account-authenticated">
 <p class="account-greeting" id="account-greeting"></p><p class="account-profile" id="account-profile"></p>
 <div class="account-history"><h3 data-t="accountHistory">Mes dernières demandes</h3><div id="account-history-list"></div></div>
+<div class="account-history" style="margin-top:24px">
+<h3>Déclarer mes achats</h3>
+<p class="account-profile">Indiquez où vous avez acheté vos articles et ce que vous attendez. Les dimensions affichées sont indicatives ; le colis sera mesuré à sa réception.</p>
+<form id="purchase-declaration-form" class="purchase-declaration-form">
+<div class="field-group"><label for="purchase-seller">Site marchand / vendeur *</label><input id="purchase-seller" maxlength="180" required placeholder="Ex. : boutique en ligne, vendeur…"></div>
+<div class="field-group"><label for="purchase-item">Article acheté *</label><input id="purchase-item" maxlength="220" required placeholder="Ex. : paire de chaussures, meuble TV…"></div>
+<div class="two-col">
+<div class="field-group"><label for="purchase-category">Catégorie *</label><select id="purchase-category" required><option value="">Choisir…</option><option value="kit">Meubles en kit</option><option value="electro">Électroménager et TV</option><option value="canape">Canapés</option><option value="vetements">Vêtements</option><option value="accessoires">Accessoires</option><option value="deco">Décoration</option><option value="autre">Autre</option></select></div>
+<div class="field-group"><label for="purchase-size">Format</label><select id="purchase-size"><option value="">Non précisé</option><option value="small">Petit</option><option value="medium">Moyen</option><option value="large">Grand</option><option value="natural">Format spécifique</option></select></div></div>
+<div class="field-group"><label for="purchase-quantity">Quantité *</label><input id="purchase-quantity" type="number" min="1" max="100" value="1" required></div>
+<div class="field-group"><label for="purchase-reference">Modèle / référence (facultatif)</label><input id="purchase-reference" maxlength="180"></div>
+<div class="field-group"><label for="purchase-url">Lien du produit (facultatif)</label><input id="purchase-url" type="url" maxlength="1000" placeholder="https://…"></div>
+<div class="field-group"><label for="purchase-notes">Précisions (facultatif)</label><textarea id="purchase-notes" rows="3" maxlength="1000"></textarea></div>
+<button class="btn btn-primary" id="purchase-submit" type="submit">Enregistrer ma déclaration</button>
+<p id="purchase-feedback" class="account-feedback" role="status" aria-live="polite"></p>
+</form><div id="purchase-history-list"></div></div>
 <div class="account-user-actions"><a class="btn btn-primary" data-t="accountNewEstimate" href="#calculateur">Nouvelle estimation</a><button class="btn btn-outline" data-t="accountLogout" id="account-logout" type="button">Déconnexion</button></div>
 </div>
 <p aria-live="polite" class="account-feedback" id="account-feedback" role="status"></p>
@@ -1304,6 +1321,19 @@ html{scroll-padding-top:98px}
     publish(a);
     const nav=$('account-nav');if(nav)nav.textContent=lang()==='en'?'My account':lang()==='nl'?'Mijn account':'Mon compte';
   }
+  async function loadPurchaseDeclarations(email){
+    const box=$('purchase-history-list');if(!box)return;box.replaceChildren();
+    try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations?select=id,seller_name,item_name,category,quantity,size_code,status,created_at&customer_email=eq.'+encodeURIComponent(email)+'&order=created_at.desc',{headers:{apikey:SB_KEY}});
+    if(!r.ok)return;const rows=await r.json();rows.forEach(x=>{const el=document.createElement('div');el.className='account-history-item';const left=document.createElement('div');const strong=document.createElement('strong');strong.textContent=x.item_name+' · '+x.quantity+' exemplaire(s)';const small=document.createElement('small');small.textContent=x.seller_name+' · '+(x.size_code||'Format non précisé');left.append(strong,small);const status=document.createElement('span');status.textContent=x.status==='received'?'Reçu':x.status==='partially_received'?'Partiellement reçu':'Déclaré';el.append(left,status);box.append(el);});}catch{}
+  }
+  $('purchase-declaration-form')?.addEventListener('submit',async e=>{
+    e.preventDefault();const form=e.currentTarget,btn=$('purchase-submit'),msg=$('purchase-feedback');
+    if(!current?.email){msg.textContent='Connectez-vous à votre espace client pour déclarer vos achats.';return;}
+    if(!form.reportValidity())return;btn.disabled=true;msg.textContent='Enregistrement en cours…';
+    const url=$('purchase-url').value.trim();if(url&&!/^https:\/\//i.test(url)){msg.textContent='Le lien doit commencer par https://';btn.disabled=false;return;}
+    const payload={customer_email:current.email,seller_name:$('purchase-seller').value.trim(),item_name:$('purchase-item').value.trim(),category:$('purchase-category').value,quantity:Number($('purchase-quantity').value),size_code:$('purchase-size').value||null,model_reference:$('purchase-reference').value.trim()||null,product_url:url||null,notes:$('purchase-notes').value.trim()||null};
+    try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok)throw Error('Enregistrement impossible. Vérifiez les champs puis réessayez.');form.reset();$('purchase-quantity').value='1';msg.textContent='Déclaration enregistrée.';await loadPurchaseDeclarations(current.email);}catch(err){msg.textContent=err.message||t('generic');}finally{btn.disabled=false;}
+  });
   async function getAccount(){
     try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');
       if(saved&&saved.email){render({authenticated:true,account:saved,shipments:[],orders:[],quotes:[]});return;}
