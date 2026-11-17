@@ -1536,13 +1536,13 @@ html{scroll-padding-top:98px}
   }
   const other=chip(tx('other'),'');other.classList.add('catalog-other-chip');chips.append(other);
   sel.value=items.some(i=>i.id===cur)?cur:'';
-  chips.querySelectorAll('.catalog-chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.id===sel.value&&sel.value!=='')));
+  chips.querySelectorAll('.catalog-size-chip,.catalog-other-chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.id===sel.value&&sel.value!=='')));
   const lb=$('catalog-label');if(lb)lb.textContent=tx('label');
  }
  const fire=()=>$('weight')?.dispatchEvent(new Event('input',{bubbles:true}));
  function apply(){
   const it=items.find(i=>i.id===sel.value),note=$('catalog-note');
-  chips.querySelectorAll('.catalog-chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.id===sel.value&&sel.value!=='')));
+  chips.querySelectorAll('.catalog-size-chip,.catalog-other-chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.id===sel.value&&sel.value!=='')));
   if(!it){window.JettCatalogFixed=null;document.body.classList.remove('catalog-mode');if(note)note.textContent='';fire();return;}
   window.JettCatalogFixed={id:it.id,label:lab(it),priceCents:Math.round(Number(it.price_eur)*100)};
   document.body.classList.add('catalog-mode');
