@@ -148,9 +148,10 @@
   render();
  }
  function render(){
-  $('catalogRows').innerHTML=catalog.map(x=>'<tr><td><strong>'+esc(x.label_fr)+'</strong><br><span class="muted">'+esc(x.group_name)+' · '+esc(x.size_code||'format naturel')+'</span></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_weight_kg" data-id="'+esc(x.id)+'" value="'+esc(x.std_weight_kg)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_length_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_length_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_width_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_width_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_height_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_height_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.01" data-field="price_eur" data-id="'+esc(x.id)+'" value="'+esc(x.price_eur)+'"></td><td><input class="catalog-edit" type="url" data-field="image_url" data-id="'+esc(x.id)+'" value="'+esc(x.image_url||'')+'" placeholder="https://…"></td><td><input type="checkbox" data-active="'+esc(x.id)+'" '+(x.active?'checked':'')+' aria-label="Activer '+esc(x.label_fr)+'"></td><td><button class="btn blue small" data-save-catalog="'+esc(x.id)+'">Enregistrer</button></td></tr>').join('');
+  $('catalogRows').innerHTML=catalog.map(x=>'<tr><td><strong>'+esc(x.label_fr)+'</strong><br><span class="muted">'+esc(x.group_name)+' · '+esc(x.size_code||'format naturel')+'</span></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_weight_kg" data-id="'+esc(x.id)+'" value="'+esc(x.std_weight_kg)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_length_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_length_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_width_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_width_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.1" data-field="std_height_cm" data-id="'+esc(x.id)+'" value="'+esc(x.std_height_cm)+'"></td><td><input class="catalog-edit" type="number" step="0.01" data-field="price_eur" data-id="'+esc(x.id)+'" value="'+esc(x.price_eur)+'"></td><td><input class="catalog-edit" type="url" data-field="image_url" data-id="'+esc(x.id)+'" value="'+esc(x.image_url||'')+'" placeholder="https://…"><input type="file" accept="image/jpeg,image/png,image/webp" data-image-upload="'+esc(x.id)+'" aria-label="Téléverser une image produit"></td><td><input type="checkbox" data-active="'+esc(x.id)+'" '+(x.active?'checked':'')+' aria-label="Activer '+esc(x.label_fr)+'"></td><td><button class="btn blue small" data-save-catalog="'+esc(x.id)+'">Enregistrer</button></td></tr>').join('');
   $('catalogEmpty').classList.toggle('hidden',catalog.length>0);
   document.querySelectorAll('[data-save-catalog]').forEach(btn=>btn.onclick=()=>saveCatalog(btn.dataset.saveCatalog));
+  document.querySelectorAll('[data-image-upload]').forEach(el=>el.onchange=()=>uploadCatalogImage(el.dataset.imageUpload,el.files&&el.files[0]));
   document.querySelectorAll('[data-active]').forEach(el=>el.onchange=()=>saveCatalog(el.dataset.active));
   $('purchaseRows').innerHTML=purchases.map(x=>'<tr><td>'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</td><td>'+esc(x.customer_email)+'</td><td>'+esc(x.seller_name)+'</td><td>'+esc(x.item_name)+'<br><span class="muted">'+esc(x.category)+'</span></td><td>'+esc(x.size_code||'Non précisé')+' · '+esc(x.quantity)+'</td><td>'+esc(x.model_reference||'—')+(x.product_url?'<br><a href="'+esc(x.product_url)+'" target="_blank" rel="noopener">Ouvrir le lien</a>':'') +(x.photo_url?'<br><a href="'+esc(x.photo_url)+'" target="_blank" rel="noopener">Voir la photo</a>':'')+'</td><td>'+parcels.filter(p=>(p.customer_email||'').toLowerCase()===String(x.customer_email||'').toLowerCase()).map(p=>esc(p.reference)+' — '+esc(p.description)+' ('+esc(statusLabels[p.status]||p.status)+')').join('<br>')+'</td><td><select data-purchase-status="'+esc(x.id)+'"><option value="declared" '+(x.status==='declared'?'selected':'')+'>Déclaré</option><option value="partially_received" '+(x.status==='partially_received'?'selected':'')+'>Partiellement reçu</option><option value="received" '+(x.status==='received'?'selected':'')+'>Reçu</option><option value="cancelled" '+(x.status==='cancelled'?'selected':'')+'>Annulé</option></select></td></tr>').join('');
   $('purchaseEmpty').classList.toggle('hidden',purchases.length>0);
@@ -202,6 +203,17 @@
  $('refresh').onclick=loadData;
  $('refreshPurchases').onclick=loadData;
  $('refreshCatalog').onclick=loadData;
+ async function uploadCatalogImage(id,file){
+  if(!file)return;if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>5*1024*1024){toast('Image JPG, PNG ou WebP de 5 Mo maximum.');return;}
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path=id+'/'+Date.now()+'.'+ext;
+  const {error}=await supabase.storage.from('catalog-images').upload(path,file,{upsert:true,contentType:file.type});
+  if(error){toast('Téléversement impossible : '+error.message);return;}
+  const url=supabase.storage.from('catalog-images').getPublicUrl(path).data.publicUrl;
+  const {error:saveError}=await supabase.from('catalog_items').update({image_url:url}).eq('id',id);
+  if(saveError){toast('Image téléversée, mais lien non enregistré : '+saveError.message);return;}
+  const row=catalog.find(x=>x.id===id);if(row)row.image_url=url;toast('Image produit enregistrée.');render();
+ }
  async function saveCatalog(id){
   const row=catalog.find(x=>x.id===id);if(!row)return;
   const payload={};document.querySelectorAll('.catalog-edit[data-id="'+CSS.escape(id)+'"]').forEach(el=>{const key=el.dataset.field;payload[key]=key==='image_url'?(el.value.trim()||null):Number(el.value);});
