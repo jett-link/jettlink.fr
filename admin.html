@@ -40,6 +40,7 @@
  <nav class="tabs">
   <button class="tab active" data-tab="parcels">Colis</button>
   <button class="tab" data-tab="customers">Clients</button>
+  <button class="tab" data-tab="scanner">Scanner un colis</button>
   <button class="tab" data-tab="add">＋ Nouveau colis</button>
  </nav>
  <section id="parcelsTab" class="panel">
@@ -52,6 +53,14 @@
   <div id="customerRows" class="customer-list"></div>
   <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
   <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
+ </section>
+ <section id="scannerTab" class="panel hidden">
+  <div class="panel-head"><div><h2>Scanner un colis</h2><p class="helper">Lecture réservée à l’administrateur connecté. Les informations privées restent dans cet espace.</p></div></div>
+  <button class="btn blue" id="startScanner" type="button">Activer la caméra</button>
+  <button class="btn light small" id="stopScanner" type="button" disabled>Arrêter</button>
+  <div id="qr-reader" style="max-width:420px;margin:16px 0"></div>
+  <div class="field"><label for="manualScan">Ou saisir le numéro / coller le lien du QR code</label><input id="manualScan" placeholder="JL-AAAA... ou lien de suivi"><button class="btn light small" id="lookupScan" type="button">Rechercher le colis</button></div>
+  <div id="scanResult" class="notice hidden" aria-live="polite"></div>
  </section>
  <section id="addTab" class="panel hidden">
   <div class="panel-head"><div><h2>Enregistrer un colis reçu à Izon</h2><p class="helper">Une référence unique et un QR code seront créés automatiquement.</p></div></div>
@@ -83,6 +92,7 @@
 <div id="toast" class="toast hidden" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 (function(){
  const SUPABASE_URL='https://uysplffdmchiahewecds.supabase.co';
@@ -93,10 +103,10 @@
  let parcels=[],customers=[];
  const statusLabels={received:'Reçu à Izon',stored:'En stockage',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
  function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
- function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));}
+ function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
  $('newParcelBtn').onclick=()=>showTab('add');
- $('logout').onclick=async()=>{await supabase.auth.signOut();location.reload()};
+ $('logout').onclick=async()=>{stopScanner();await supabase.auth.signOut();location.reload()};
  $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();const email=$('email').value.trim().toLowerCase();$('loginMsg').textContent='Envoi du lien sécurisé…';
   if(email!==ADMIN_EMAIL){$('loginMsg').textContent='Cette adresse e-mail n’est pas autorisée.';return}
@@ -137,6 +147,14 @@
   document.querySelectorAll('[data-label]').forEach(el=>el.addEventListener('click',()=>printLabel(parcels.find(x=>x.id===el.dataset.label))));
  }
  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ let qrScanner=null;
+ function extractRef(raw){const value=String(raw||'').trim();try{const u=new URL(value);const q=u.searchParams.get('ref');if(q)return q;const m=u.pathname.match(/(JL-\\d{8}-[A-F0-9]{8})/i);if(m)return m[1];}catch{}const m=value.match(/JL-\\d{8}-[A-F0-9]{8}/i);return m?m[0]:value;}
+ function showScannedParcel(raw){const ref=extractRef(raw);const p=parcels.find(x=>(x.reference||'').toLowerCase()===ref.toLowerCase());const box=$('scanResult');box.classList.remove('hidden');if(!p){box.innerHTML='<strong>Colis introuvable dans la base administrateur.</strong><br>Vérifie le numéro et actualise la liste des colis.';return;}box.innerHTML='<strong>Colis reconnu — '+esc(p.reference)+'</strong><br>Nom et prénom : '+esc(p.customer_name)+'<br>E-mail : '+esc(p.customer_email)+'<br>Téléphone : '+esc(p.customer_phone||'Non renseigné')+'<br>Réception à Izon : '+esc(new Date(p.received_at).toLocaleString('fr-FR'))+'<br>Statut : '+esc(statusLabels[p.status]||p.status);}
+ async function stopScanner(){if(qrScanner){try{if(qrScanner.isScanning)await qrScanner.stop();await qrScanner.clear();}catch{}qrScanner=null;}const a=$('startScanner'),b=$('stopScanner');if(a)a.disabled=false;if(b)b.disabled=true;}
+ $('startScanner').addEventListener('click',async()=>{if(!window.Html5Qrcode){toast('Le lecteur QR ne s’est pas chargé. Utilise la saisie manuelle.');return;}try{qrScanner=new Html5Qrcode('qr-reader');await qrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},async decoded=>{await stopScanner();$('manualScan').value=decoded;showScannedParcel(decoded);},()=>{});$('startScanner').disabled=true;$('stopScanner').disabled=false;}catch(e){toast('Caméra inaccessible. Vérifie son autorisation ou utilise la saisie manuelle.');await stopScanner();}});
+ $('stopScanner').addEventListener('click',stopScanner);
+ $('lookupScan').addEventListener('click',()=>showScannedParcel($('manualScan').value));
+ $('manualScan').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();showScannedParcel($('manualScan').value);}});
  $('parcelSearch').addEventListener('input',render);
  $('refresh').onclick=loadData;
  async function changeStatus(id,status){
