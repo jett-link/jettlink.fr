@@ -49,7 +49,7 @@
   <div id="parcelEmpty" class="empty hidden">Aucun colis enregistré pour le moment.</div>
  </section>
  <section id="customersTab" class="panel hidden">
-  <div class="panel-head"><h2>Clients enregistrés</h2><span class="muted" id="customerCount"></span></div>
+  <div class="panel-head"><h2>Clients enregistrés</h2><div class="tools"><span class="muted" id="customerCount"></span><input class="search" id="customerSearch" placeholder="Rechercher un nom, prénom ou e-mail…"></div></div>
   <div id="customerRows" class="customer-list"></div>
   <div id="customerEmpty" class="empty hidden">Aucun client enregistré.</div>
   <p class="helper">Cette liste reprend les clients présents dans la base JETT LINK.</p>
@@ -63,14 +63,12 @@
   <div id="scanResult" class="notice hidden" aria-live="polite"></div>
  </section>
  <section id="addTab" class="panel hidden">
-  <div class="panel-head"><div><h2>Enregistrer un colis reçu à Izon</h2><p class="helper">Une référence unique et un QR code seront créés automatiquement.</p></div></div>
+  <div class="panel-head"><div><h2>Créer une étiquette pour un colis reçu à Izon</h2><p class="helper">Sélectionne le client, crée une étiquette QR unique pour ce colis, colle-la puis scanne-la pour déclencher la notification.</p></div></div>
   <form id="parcelForm">
    <div class="gridform">
-    <div class="field"><label for="clientName">Nom du client *</label><input id="clientName" required maxlength="120" placeholder="Nom et prénom"></div>
-    <div class="field"><label for="clientEmail">E-mail du client *</label><input id="clientEmail" type="email" required maxlength="254" placeholder="client@email.com"></div>
-    <div class="field"><label for="clientPhone">Téléphone</label><input id="clientPhone" maxlength="50" placeholder="+33…"></div>
+    <div class="field full"><label for="customerSelect">Client identifié sur le colis *</label><select id="customerSelect" required><option value="">Choisir un client enregistré…</option></select></div>
     <div class="field"><label for="senderTracking">N° de suivi du vendeur</label><input id="senderTracking" maxlength="120" placeholder="Facultatif"></div>
-    <div class="field full"><label for="description">Description du colis *</label><input id="description" required maxlength="300" placeholder="Ex. : carton, micro-ondes, vêtements…"></div>
+    <div class="field"><label for="description">Identification du colis *</label><input id="description" required maxlength="300" placeholder="Ex. : colis 1, carton, sachet…"></div>
    </div>
    <div class="eyebrow" style="margin:8px 0">DIMENSIONS ET POIDS (FACULTATIF)</div>
    <div class="dimgrid">
@@ -79,13 +77,13 @@
     <div class="field"><label for="width">Largeur (cm)</label><input id="width" type="number" min="0" step="0.01"></div>
     <div class="field"><label for="height">Hauteur (cm)</label><input id="height" type="number" min="0" step="0.01"></div>
    </div>
-   <button class="btn blue" type="submit">Enregistrer le colis et créer son QR</button>
+   <button class="btn blue" type="submit">Créer l’étiquette QR du colis</button>
    <div class="note" id="parcelMsg" aria-live="polite"></div>
   </form>
  </section>
  <section class="panel">
   <div class="panel-head"><h2>À retenir</h2></div>
-  <p class="helper">Après réception physique du colis à Izon, enregistre-le ici, imprime son étiquette QR et colle-la sur le colis. Le QR sert d’identifiant interne JETT LINK. Le scan caméra et les notifications automatiques aux clients ne sont pas encore activés dans cette première version.</p>
+  <p class="helper">Chaque colis reçoit sa propre référence et son propre QR code. Après avoir collé l’étiquette, scanne le QR dans l’onglet « Scanner un colis » : le colis passe au statut « Reçu à Izon » et un e-mail est envoyé au client. Un nouveau scan ne renvoie pas de deuxième notification.</p>
  </section>
 </main>
 <div id="labelStage" class="labelstage"><div class="printlabel"><div><div class="labelbrand">JETT LINK</div><div class="labelsmall">COLIS RÉCEPTIONNÉ À IZON</div><div id="labelRef" class="labelref"></div><div id="labelName" class="labelsmall"></div><div id="labelDesc" class="labelsmall"></div><div class="label-foot">Conserver cette étiquette sur le colis</div></div><div id="labelQr" class="qr"></div></div></div>
@@ -101,7 +99,7 @@
  const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
  const $=id=>document.getElementById(id);
  let parcels=[],customers=[];
- const statusLabels={received:'Reçu à Izon',stored:'En stockage',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
+ const statusLabels={received:'Reçu à Izon – client notifié',stored:'Étiquette créée – à scanner',awaiting_decision:'En attente de décision',ready_to_ship:'Prêt à expédier',shipped:'Expédié',returned:'Retourné',picked_up:'Retiré'};
  function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),3500)}
  function showTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['parcels','customers','scanner','add'].forEach(t=>$(t+'Tab').classList.toggle('hidden',t!==name));if(name!=='scanner')stopScanner();}
  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
@@ -133,28 +131,48 @@
  }
  function render(){
   $('statTotal').textContent=parcels.length;
-  $('statReceived').textContent=parcels.filter(x=>['received','stored'].includes(x.status)).length;
-  $('statWaiting').textContent=parcels.filter(x=>['awaiting_decision','returned'].includes(x.status)).length;
+  $('statReceived').textContent=parcels.filter(x=>x.status==='received').length;
+  $('statWaiting').textContent=parcels.filter(x=>['stored','awaiting_decision','returned'].includes(x.status)).length;
   $('statShipped').textContent=parcels.filter(x=>x.status==='shipped').length;
   const q=$('parcelSearch').value.trim().toLowerCase();
   const shown=parcels.filter(x=>[x.reference,x.customer_name,x.customer_email,x.description,x.sender_tracking].join(' ').toLowerCase().includes(q));
   $('parcelRows').innerHTML=shown.map(x=>'<tr><td><span class="ref">'+esc(x.reference)+'</span><br><span class="muted">'+esc(x.customer_email)+'</span></td><td>'+esc(x.customer_name)+'<br><span class="muted">'+esc(x.customer_phone||'')+'</span></td><td>'+esc(x.description)+'</td><td>'+new Date(x.received_at).toLocaleDateString('fr-FR')+'</td><td><span class="status '+esc(x.status)+'">'+(statusLabels[x.status]||esc(x.status))+'</span></td><td><div class="rowactions"><select aria-label="Modifier le statut" data-status="'+x.id+'">'+Object.keys(statusLabels).map(k=>'<option value="'+k+'" '+(x.status===k?'selected':'')+'>'+statusLabels[k]+'</option>').join('')+'</select><button class="btn light small" data-label="'+x.id+'">Étiquette</button></div></td></tr>').join('');
   $('parcelEmpty').classList.toggle('hidden',shown.length>0);
+  const customerQuery=$('customerSearch').value.trim().toLowerCase();
+  const customerShown=customers.filter(x=>[x.first_name,x.last_name,x.email,x.phone].join(' ').toLowerCase().includes(customerQuery));
   $('customerCount').textContent=customers.length+' client(s)';
-  $('customerRows').innerHTML=customers.map(x=>'<div class="customer"><div><strong>'+esc([x.first_name,x.last_name].filter(Boolean).join(' '))+'</strong><span class="muted">'+esc(x.email||'')+'</span><br><span class="muted">'+esc(x.phone||'')+'</span></div><span class="muted">'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</span></div>').join('');
-  $('customerEmpty').classList.toggle('hidden',customers.length>0);
+  $('customerRows').innerHTML=customerShown.map(x=>'<div class="customer"><div><strong>'+esc([x.first_name,x.last_name].filter(Boolean).join(' '))+'</strong><span class="muted">'+esc(x.email||'')+'</span><br><span class="muted">'+esc(x.phone||'')+'</span></div><div class="rowactions"><span class="muted">'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</span><button class="btn blue small" data-add-customer="'+esc(x.id)+'">Créer une étiquette colis</button></div></div>').join('');
+  $('customerEmpty').classList.toggle('hidden',customerShown.length>0);
+  const currentCustomer=$('customerSelect').value;
+  $('customerSelect').innerHTML='<option value="">Choisir un client enregistré…</option>'+customers.map(x=>'<option value="'+esc(x.id)+'">'+esc([x.first_name,x.last_name].filter(Boolean).join(' '))+' — '+esc(x.email||'')+'</option>').join('');
+  if(customers.some(x=>x.id===currentCustomer))$('customerSelect').value=currentCustomer;
   document.querySelectorAll('[data-status]').forEach(el=>el.addEventListener('change',()=>changeStatus(el.dataset.status,el.value)));
   document.querySelectorAll('[data-label]').forEach(el=>el.addEventListener('click',()=>printLabel(parcels.find(x=>x.id===el.dataset.label))));
+  document.querySelectorAll('[data-add-customer]').forEach(el=>el.addEventListener('click',()=>{$('customerSelect').value=el.dataset.addCustomer;showTab('add');$('description').focus();}));
  }
  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  let qrScanner=null;
  function extractRef(raw){const value=String(raw||'').trim();try{const u=new URL(value);const q=u.searchParams.get('ref');if(q)return q;const m=u.pathname.match(/(JL-\d{8}-[A-F0-9]{8})/i);if(m)return m[1];}catch{}const m=value.match(/JL-\d{8}-[A-F0-9]{8}/i);return m?m[0]:value;}
- function showScannedParcel(raw){const ref=extractRef(raw);const p=parcels.find(x=>(x.reference||'').toLowerCase()===ref.toLowerCase());const box=$('scanResult');box.classList.remove('hidden');if(!p){box.innerHTML='<strong>Colis introuvable dans la base administrateur.</strong><br>Vérifie le numéro et actualise la liste des colis.';return;}box.innerHTML='<strong>Colis reconnu — '+esc(p.reference)+'</strong><br>Nom et prénom : '+esc(p.customer_name)+'<br>E-mail : '+esc(p.customer_email)+'<br>Téléphone : '+esc(p.customer_phone||'Non renseigné')+'<br>Réception à Izon : '+esc(new Date(p.received_at).toLocaleString('fr-FR'))+'<br>Statut : '+esc(statusLabels[p.status]||p.status);}
+ async function showScannedParcel(raw){
+  const ref=extractRef(raw);const p=parcels.find(x=>(x.reference||'').toLowerCase()===ref.toLowerCase());const box=$('scanResult');box.classList.remove('hidden');
+  if(!p){box.innerHTML='<strong>Colis introuvable dans la base administrateur.</strong><br>Vérifie le numéro et actualise la liste des colis.';return;}
+  box.innerHTML='<strong>Colis reconnu — '+esc(p.reference)+'</strong><br>Client : '+esc(p.customer_name)+'<br>Envoi de la notification au client…';
+  const {data,error}=await supabase.functions.invoke('confirm-parcel-received',{body:{reference:ref}});
+  if(error||!data?.ok){
+   const why=data?.error||error?.message||'Erreur inconnue';
+   box.innerHTML='<strong>Colis reconnu — '+esc(p.reference)+'</strong><br>La notification n’a pas pu être envoyée.<br><span class="muted">Détail : '+esc(why)+'. Tu peux réessayer le scan.</span>';
+   return;
+  }
+  if(data.already_notified)box.innerHTML='<strong>Colis déjà notifié — '+esc(p.reference)+'</strong><br>Le client a déjà reçu la notification de réception. Aucun nouvel e-mail n’a été envoyé.';
+  else box.innerHTML='<strong>Réception confirmée — '+esc(p.reference)+'</strong><br>Le statut est passé à « Reçu à Izon ».<br><strong>La notification e-mail a été envoyée à '+esc(p.customer_email)+'.</strong>';
+  await loadData();
+ }
  async function stopScanner(){if(qrScanner){try{if(qrScanner.isScanning)await qrScanner.stop();await qrScanner.clear();}catch{}qrScanner=null;}const a=$('startScanner'),b=$('stopScanner');if(a)a.disabled=false;if(b)b.disabled=true;}
  $('startScanner').addEventListener('click',async()=>{if(!window.Html5Qrcode){toast('Le lecteur QR ne s’est pas chargé. Utilise la saisie manuelle.');return;}try{qrScanner=new Html5Qrcode('qr-reader');await qrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},async decoded=>{await stopScanner();$('manualScan').value=decoded;showScannedParcel(decoded);},()=>{});$('startScanner').disabled=true;$('stopScanner').disabled=false;}catch(e){toast('Caméra inaccessible. Vérifie son autorisation ou utilise la saisie manuelle.');await stopScanner();}});
  $('stopScanner').addEventListener('click',stopScanner);
  $('lookupScan').addEventListener('click',()=>showScannedParcel($('manualScan').value));
  $('manualScan').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();showScannedParcel($('manualScan').value);}});
+ $('customerSearch').addEventListener('input',render);
  $('parcelSearch').addEventListener('input',render);
  $('refresh').onclick=loadData;
  async function changeStatus(id,status){
@@ -169,12 +187,14 @@
  $('parcelForm').addEventListener('submit',async e=>{
   e.preventDefault();const btn=e.submitter;btn.disabled=true;$('parcelMsg').textContent='Enregistrement en cours…';
   const num=id=>$(id).value.trim()===''?null:Number($(id).value);
-  const payload={customer_name:$('clientName').value.trim(),customer_email:$('clientEmail').value.trim().toLowerCase(),customer_phone:$('clientPhone').value.trim()||null,sender_tracking:$('senderTracking').value.trim()||null,description:$('description').value.trim(),weight_kg:num('weight'),length_cm:num('length'),width_cm:num('width'),height_cm:num('height'),status:'received'};
+  const customer=customers.find(x=>x.id===$('customerSelect').value);
+  if(!customer){$('parcelMsg').textContent='Sélectionne un client déjà enregistré.';btn.disabled=false;return}
+  const payload={customer_id:customer.id,customer_name:[customer.first_name,customer.last_name].filter(Boolean).join(' '),customer_email:customer.email.toLowerCase(),customer_phone:customer.phone||null,sender_tracking:$('senderTracking').value.trim()||null,description:$('description').value.trim(),weight_kg:num('weight'),length_cm:num('length'),width_cm:num('width'),height_cm:num('height'),status:'stored'};
   const {data,error}=await supabase.from('admin_parcels').insert(payload).select().single();
   if(error){$('parcelMsg').textContent='Erreur : '+error.message;btn.disabled=false;return}
-  const event=await supabase.from('admin_parcel_events').insert({parcel_id:data.id,event_type:'received',note:'Colis réceptionné à Izon'});
+  const event=await supabase.from('admin_parcel_events').insert({parcel_id:data.id,event_type:'stored',note:'Client identifié. Étiquette QR créée ; scan requis pour envoyer la notification.'});
   if(event.error)toast('Colis enregistré. Historique indisponible.');
-  $('parcelForm').reset();$('parcelMsg').textContent='Colis enregistré : '+data.reference;
+  $('parcelForm').reset();$('parcelMsg').textContent='Étiquette créée : '+data.reference+'. Colle-la sur le colis puis scanne le QR.';
   await loadData();showTab('parcels');printLabel(data);btn.disabled=false;
  });
  function printLabel(p){
