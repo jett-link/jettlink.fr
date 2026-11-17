@@ -1561,7 +1561,8 @@ html{scroll-padding-top:98px}
   if(note)note.textContent=lab(it)+' — '+tx('note').replace('{d}',dims(it));
  }
  window.JettCatalog={fixedText:()=>window.JettCatalogFixed?tx('fixed')+' '+window.JettCatalogFixed.label:'',lineText:()=>window.JettCatalogFixed?tx('line'):''};
- const resetToOther=()=>{if(sel.value!==''){sel.value='';apply();}};\n const resetCatalog=()=>{sel.value='';activeGroup='';activeProduct='';apply();build();};
+ const resetToOther=()=>{if(sel.value!==''){sel.value='';apply();}};
+ const resetCatalog=()=>{sel.value='';activeGroup='';activeProduct='';apply();build();};
  ['weight','length','width','height'].forEach(k=>$(k)?.addEventListener('input',e=>{if(e.isTrusted)resetToOther();}));
  document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>setTimeout(resetToOther,0)));
  $('shipping-calculator')?.addEventListener('reset',()=>setTimeout(resetCatalog,0));
