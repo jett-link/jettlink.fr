@@ -300,7 +300,7 @@ body{overflow-x:clip}
 .account-submit{width:100%;justify-content:space-between;min-height:54px}
 .account-helper{color:#738e9e;font-size:10px;margin:13px 0 0;line-height:1.7}
 .account-feedback{font-size:12px;color:#376d87;margin:17px 0;line-height:1.7}
-.account-feedback[data-state=error]{color:#af3f34}.account-feedback[data-state=ok]{color:#26765b}
+.account-feedback[data-state=error]{color:#af3f34}.account-feedback[data-state=ok]{color:#176448;background:#e9f8ef;border:2px solid #8ed4a9;border-radius:14px;padding:18px 20px;font-size:18px;font-weight:750;line-height:1.5;box-shadow:0 5px 18px rgba(20,100,65,.09)}.account-feedback[data-state=ok]::before{content:'✓';display:inline-grid;place-items:center;width:30px;height:30px;margin-right:10px;border-radius:50%;background:#198754;color:white;font-size:20px;vertical-align:middle}
 .account-security{display:flex;gap:10px;align-items:center;border-top:1px solid #dceaf2;margin-top:16px;padding-top:15px;font-size:10px;color:#6b879b}
 .account-security>span:first-child{font-size:17px;color:#3b8caf}
 .account-greeting{font:800 25px var(--font-display);color:#12334d;margin:0 0 9px}
@@ -1387,7 +1387,7 @@ html{scroll-padding-top:98px}
       if(!res.ok&&res.status!==409)throw Error(t('generic'));
       try{localStorage.setItem(STORE,JSON.stringify({name:(f+' '+l).trim(),email,phone,address}));}catch{}
       render({authenticated:true,account:{name:(f+' '+l).trim(),email,phone,address},shipments:[],orders:[],quotes:[]});
-      message(res.status===409?t('already'):t('sent'),'ok');
+      message(res.status===409?'Ce compte existe déjà. Vous pouvez accéder à votre espace client.':'✓ Votre compte JETT LINK a bien été créé ! Vos informations ont été enregistrées.','ok');
     }catch(err){message(err.message||t('generic'),'error');}
     finally{submit.disabled=false;}
   });
