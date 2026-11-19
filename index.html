@@ -569,28 +569,13 @@ html{scroll-padding-top:98px}
 <p class="account-helper" data-t="accountHelper">Aucun mot de passe à retenir.</p>
 </form>
 </div>
+<p aria-live="polite" class="account-feedback" id="account-feedback" role="status"></p>
 <div hidden="" id="account-authenticated">
 <p class="account-greeting" id="account-greeting"></p><p class="account-profile" id="account-profile"></p>
 <div class="account-history"><h3 data-t="accountHistory">Mes dernières demandes</h3><div id="account-history-list"></div></div>
-<div class="account-history" style="margin-top:24px">
-<h3>Déclarer mes achats</h3>
-<p class="account-profile">Indiquez où vous avez acheté vos articles et ce que vous attendez. Les dimensions affichées sont indicatives ; le colis sera mesuré à sa réception.</p>
-<form id="purchase-declaration-form" class="purchase-declaration-form">
-<div class="field-group"><label for="purchase-seller">Site marchand / vendeur *</label><input id="purchase-seller" maxlength="180" required placeholder="Ex. : boutique en ligne, vendeur…"></div>
-<div class="field-group"><label for="purchase-item">Article(s) acheté(s) *</label><textarea id="purchase-item" rows="3" maxlength="1000" required placeholder="Vous pouvez lister plusieurs articles : 2 t-shirts, 1 paire de chaussures, 1 sac…"></textarea></div>
-<div class="two-col">
-<div class="field-group"><label for="purchase-category">Catégorie *</label><select id="purchase-category" required><option value="">Choisir…</option><option value="kit">Meubles en kit</option><option value="electro">Électroménager et TV</option><option value="autre_electro">Autre appareil électroménager</option><option value="canape">Canapés</option><option value="vetements">Vêtements</option><option value="accessoires">Accessoires</option><option value="deco">Décoration</option><option value="autre">Autre</option></select></div>
-<div class="field-group"><label for="purchase-size">Format</label><select id="purchase-size"><option value="">Non précisé</option><option value="small">Petit</option><option value="medium">Moyen</option><option value="large">Grand</option><option value="natural">Format spécifique</option></select></div></div>
-<div class="field-group"><label for="purchase-quantity">Quantité *</label><input id="purchase-quantity" type="number" min="1" max="100" value="1" required></div>
-<div class="field-group"><label for="purchase-reference">Modèle / référence (facultatif)</label><input id="purchase-reference" maxlength="180"></div>
-<div class="field-group"><label for="purchase-url">Lien du produit (facultatif)</label><input id="purchase-url" type="url" maxlength="1000" placeholder="https://…"></div>\n<div class="field-group"><label for="purchase-photo">Lien vers une photo (facultatif)</label><input id="purchase-photo" type="url" maxlength="1000" placeholder="https://…"></div>
-<div class="field-group"><label for="purchase-notes">Précisions (facultatif)</label><textarea id="purchase-notes" rows="3" maxlength="1000"></textarea></div>
-<button class="btn btn-primary" id="purchase-submit" type="submit">Enregistrer ma déclaration</button>
-<p id="purchase-feedback" class="account-feedback" role="status" aria-live="polite"></p>
-</form><div id="purchase-history-list"></div></div>
 <div class="account-user-actions"><a class="btn btn-primary" data-t="accountNewEstimate" href="#calculateur">Nouvelle estimation</a><button class="btn btn-outline" data-t="accountLogout" id="account-logout" type="button">Déconnexion</button></div>
 </div>
-<p aria-live="polite" class="account-feedback" id="account-feedback" role="status"></p>
+
 <div class="account-security"><span aria-hidden="true">◈</span><span data-t="accountSecurity">Vérification par e-mail · Connexion sécurisée · Données non publiques</span></div>
 </div>
 </div>
@@ -611,6 +596,22 @@ html{scroll-padding-top:98px}
 <div class="multi-actions"><button class="btn btn-outline" id="multi-add" type="button"><span data-t="multiAdd">Ajouter un article</span><span aria-hidden="true">＋</span></button><button class="btn btn-primary" id="multi-request" type="button"><span data-t="multiRequest">Demander un devis multi-colis</span><span aria-hidden="true">↗</span></button></div>
 <small class="multi-legal" data-t="multiLegal">Simulation non contractuelle : tarifs par colis, hors remise, taxes, stockage et frais éventuels. Aucun paiement groupé n'est proposé ici.</small>
 </div></details>
+</div><div class="wrap"><div class="account-history" id="calculator-purchase-declaration" style="margin-top:28px" hidden>
+<h3>Déclarer mes achats</h3>
+<p class="account-profile">Indiquez où vous avez acheté vos articles et ce que vous attendez. Les dimensions affichées sont indicatives ; le colis sera mesuré à sa réception.</p>
+<form id="purchase-declaration-form" class="purchase-declaration-form">
+<div class="field-group"><label for="purchase-seller">Site marchand / vendeur *</label><input id="purchase-seller" maxlength="180" required placeholder="Ex. : boutique en ligne, vendeur…"></div>
+<div class="field-group"><label for="purchase-item">Article(s) acheté(s) *</label><textarea id="purchase-item" rows="3" maxlength="1000" required placeholder="Vous pouvez lister plusieurs articles : 2 t-shirts, 1 paire de chaussures, 1 sac…"></textarea></div>
+<div class="two-col">
+<div class="field-group"><label for="purchase-category">Catégorie *</label><select id="purchase-category" required><option value="">Choisir…</option><option value="kit">Meubles en kit</option><option value="electro">Électroménager et TV</option><option value="autre_electro">Autre appareil électroménager</option><option value="canape">Canapés</option><option value="vetements">Vêtements</option><option value="accessoires">Accessoires</option><option value="deco">Décoration</option><option value="autre">Autre</option></select></div>
+<div class="field-group"><label for="purchase-size">Format</label><select id="purchase-size"><option value="">Non précisé</option><option value="small">Petit</option><option value="medium">Moyen</option><option value="large">Grand</option><option value="natural">Format spécifique</option></select></div></div>
+<div class="field-group"><label for="purchase-quantity">Quantité *</label><input id="purchase-quantity" type="number" min="1" max="100" value="1" required></div>
+<div class="field-group"><label for="purchase-reference">Modèle / référence (facultatif)</label><input id="purchase-reference" maxlength="180"></div>
+<div class="field-group"><label for="purchase-url">Lien du produit (facultatif)</label><input id="purchase-url" type="url" maxlength="1000" placeholder="https://…"></div>\n<div class="field-group"><label for="purchase-photo">Lien vers une photo (facultatif)</label><input id="purchase-photo" type="url" maxlength="1000" placeholder="https://…"></div>
+<div class="field-group"><label for="purchase-notes">Précisions (facultatif)</label><textarea id="purchase-notes" rows="3" maxlength="1000"></textarea></div>
+<button class="btn btn-primary" id="purchase-submit" type="submit">Enregistrer ma déclaration</button>
+<p id="purchase-feedback" class="account-feedback" role="status" aria-live="polite"></p>
+</form><div id="purchase-history-list"></div></div>
 </div></section><section aria-labelledby="order-heading" class="section request-section" id="commande"><div class="wrap"><div class="section-top order-head"><div><span class="section-index"><span data-t="requestIndex">VOTRE DEMANDE</span></span><h2 id="order-heading"><span data-t="orderTitle1">Votre colis,</span><br/><em data-t="orderTitle2">votre demande.</em></h2></div><p class="section-side" data-t="orderLead">Demandez un devis sans paiement ou préparez une commande avec un montant vérifié avant règlement.</p></div><div aria-label="Choisir votre démarche" class="request-mode" role="group"><button aria-pressed="true" class="mode-btn is-active" id="mode-quote" type="button"><span>✉</span><span data-t="modeQuote">Obtenir un devis gratuit</span></button><button aria-pressed="false" class="mode-btn" id="mode-order" type="button"><span>▣</span><span data-t="modeOrder">Préparer une commande</span></button></div>
 <div class="request-grid"><div class="request-main"><div class="request-clarifier"><span aria-hidden="true">↗</span><p><strong data-t="requestClarifierTitle">Un devis n'est pas une commande.</strong><small data-t="requestClarifierText">Envoyez d'abord vos informations ; confirmez seulement après avoir reçu les conditions applicables.</small></p></div><div class="request-progress"><span>01 <b data-t="stepEstimate">Estimation</b></span><i></i><span>02 <b data-t="stepDetails">Coordonnées</b></span><i></i><span>03 <b data-t="stepConfirmation">Confirmation</b></span></div><form id="jett-request-form" novalidate=""><div class="request-step-callout"><span class="step-pill">01</span><div><strong data-t="requestCallout">Votre estimation est déjà prête.</strong><small data-t="requestCalloutSub">Complétez simplement vos coordonnées pour poursuivre.</small></div></div><div class="card-number"><span>01</span><span data-t="requestAbout">VOS COORDONNÉES</span></div><div class="two-col"><div class="field-group"><label data-t="firstName" for="client-firstname">Prénom *</label><input autocomplete="given-name" data-ph="firstNamePh" id="client-firstname" maxlength="60" minlength="1" name="first_name" placeholder="Ex. Marie" required type="text"/></div><div class="field-group"><label data-t="lastName" for="client-lastname">Nom *</label><input autocomplete="family-name" data-ph="lastNamePh" id="client-lastname" maxlength="60" minlength="1" name="last_name" placeholder="Ex. Dupont" required type="text"/></div></div><div class="two-col"><div class="field-group"><label data-t="phone" for="client-phone">Numéro de téléphone *</label><input autocomplete="tel" data-ph="phonePh" id="client-phone" maxlength="50" name="phone" placeholder="Ex. +594 694 00 00 00" required type="tel"/></div><div class="field-group"><label data-t="email" for="client-email">Adresse e-mail *</label><input autocomplete="email" data-ph="emailPh" id="client-email" maxlength="254" name="email" placeholder="vous@exemple.fr" required type="email"/></div></div><div class="field-group"><label data-t="description" for="client-description">Contenu du colis *</label><textarea data-ph="descriptionPh" id="client-description" maxlength="500" minlength="3" name="description" placeholder="Ex. vêtements, articles de maison..." required rows="3"></textarea></div><p class="pay-deadline" data-t="payDeadline" style="margin:4px 0 12px;padding:12px 14px;border-radius:12px;background:#eef6fb;border:1px solid #cfe3ef;color:#164460;font-size:14px;line-height:1.5">Vous disposez de 3 jours pour régler votre réexpédition à compter de la réception de votre colis. Au-delà, des frais de stockage de 3 € par jour s’appliquent.</p><div aria-hidden="true" class="bot-field"><label for="client-website">Site personnel</label><input autocomplete="off" id="client-website" name="website" tabindex="-1" type="text"/></div><div class="policy"><input id="client-consent" required="" type="checkbox"/><label data-t="consent" for="client-consent">J'accepte que mes coordonnées soient utilisées pour traiter ma demande et me recontacter à son sujet. *</label></div><div class="policy dimensions-policy" hidden><input id="client-dimensions-consent" type="checkbox"/><label data-t="dimensionConfirm" for="client-dimensions-consent">Je comprends que JETT LINK vérifiera le poids et les dimensions réels de mon colis à sa réception. Si un écart modifie le tarif, le nouveau montant me sera communiqué pour accord avant toute facturation complémentaire. *</label></div>
 <div class="request-divider"></div><div class="card-number"><span>02</span><span data-t="choosePayment">CHOISISSEZ VOTRE MODE DE PAIEMENT</span></div><p class="pay-intro" data-t="payIntro">Un devis ne nécessite aucun paiement. Pour une commande, le montant est toujours recalculé et sécurisé côté serveur.</p><div aria-live="polite" class="checkout-status" id="checkout-status" role="status">Les paiements sont indisponibles tant que la configuration du site n'est pas terminée.</div><div class="payment-choices"><label class="payment-choice"><input checked="" name="pay-method" type="radio" value="paypal"/><span class="pay-icon pay-pal">P</span><span class="pay-txt"><strong>PayPal</strong><small data-t="paypalSub">Payer avec PayPal</small></span><span class="pay-indicator"></span></label><label class="payment-choice"><input name="pay-method" type="radio" value="stripe"/><span class="pay-icon pay-card">▤</span><span class="pay-txt"><strong data-t="cardTitle">Carte bancaire</strong><small data-t="stripeSub">Paiement sécurisé via Stripe</small></span><span class="pay-indicator"></span></label></div>
@@ -1308,7 +1309,7 @@ html{scroll-padding-top:98px}
   function publish(user){current=user;window.dispatchEvent(new CustomEvent('jett:account',{detail:{account:user}}));}
   function render(data){
     const on=!!data?.authenticated;
-    anonymous.hidden=on;authenticated.hidden=!on;
+    anonymous.hidden=on;authenticated.hidden=!on;const purchaseSection=$('calculator-purchase-declaration');if(purchaseSection)purchaseSection.hidden=!on;
     if(!on){publish(null);const nav=$('account-nav');if(nav)nav.textContent=(lang()==='en'?'Register':lang()==='nl'?'Registreren':'Inscription');return;}
     const a=data.account;
     $('account-greeting').textContent=`${t('hi')} ${a.name.split(' ')[0]} !`;
@@ -1387,7 +1388,7 @@ html{scroll-padding-top:98px}
       if(!res.ok&&res.status!==409)throw Error(t('generic'));
       try{localStorage.setItem(STORE,JSON.stringify({name:(f+' '+l).trim(),email,phone,address}));}catch{}
       render({authenticated:true,account:{name:(f+' '+l).trim(),email,phone,address},shipments:[],orders:[],quotes:[]});
-      message(res.status===409?'Ce compte existe déjà. Vous pouvez accéder à votre espace client.':'✓ Votre compte JETT LINK a bien été créé ! Vos informations ont été enregistrées.','ok');
+      message(res.status===409?'Ce compte existe déjà. Vous pouvez accéder à votre espace client.':'Votre compte JETT LINK a été créé avec succès ! Vos informations ont bien été enregistrées.','ok');
     }catch(err){message(err.message||t('generic'),'error');}
     finally{submit.disabled=false;}
   });
