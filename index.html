@@ -1550,7 +1550,7 @@ html{scroll-padding-top:98px}
    const arr=items.filter(i=>i.group_name===activeGroup),map=new Map();
    arr.forEach(it=>{const key=it.parent_item_id||it.id;if(!map.has(key))map.set(key,[]);map.get(key).push(it);});
    map.forEach((variants,key)=>{
-    const first=variants[0],baseLabel=({tv:'TV',frigo:'Réfrigérateur',lit:'Lit',autre_electro:'Autres appareils électroménagers',armoire:'Armoire'}[key]||cleanProductName(first.label_fr||''));
+    const first=variants[0],baseLabel=({tv:'TV',frigo:'Réfrigérateur',lit:'Lit',autre_electro:'Autres appareils électroménagers',armoire:'Armoire',vetements:'Vêtements'}[key]||cleanProductName(first.label_fr||''));
     const b=document.createElement('button');b.type='button';b.className='catalog-chip catalog-product-button';b.textContent=baseLabel;b.setAttribute('aria-pressed',String(activeProduct===key));
     b.addEventListener('click',()=>{const hadSelection=sel.value!=='';activeProduct=activeProduct===key?'':key;sel.value='';if(hadSelection)clearCatalogMeasurements();apply();build();});chips.append(b);
    });
