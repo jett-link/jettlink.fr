@@ -1550,7 +1550,7 @@ html{scroll-padding-top:98px}
    const arr=items.filter(i=>i.group_name===activeGroup),map=new Map();
    arr.forEach(it=>{const key=it.parent_item_id||it.id;if(!map.has(key))map.set(key,[]);map.get(key).push(it);});
    map.forEach((variants,key)=>{
-    const first=variants[0],baseLabel=({tv:'TV',frigo:'Réfrigérateur',lit:'Lit',autre_electro:'Autres appareils électroménagers',armoire:'Armoire',vetements:'Vêtements'}[key]||cleanProductName(first.label_fr||''));
+    const first=variants[0],baseLabel=({tv:'TV',frigo:'Réfrigérateur',lit:'Lit',autre_electro:'Autres appareils électroménagers',armoire:'Armoire',vetements:'Vêtements',seche_linge:'Sèche-linge'}[key]||cleanProductName(first.label_fr||''));
     const b=document.createElement('button');b.type='button';b.className='catalog-chip catalog-product-button';b.textContent=baseLabel;b.setAttribute('aria-pressed',String(activeProduct===key));
     b.addEventListener('click',()=>{const hadSelection=sel.value!=='';activeProduct=activeProduct===key?'':key;sel.value='';if(hadSelection)clearCatalogMeasurements();apply();build();});chips.append(b);
    });
@@ -1563,7 +1563,7 @@ html{scroll-padding-top:98px}
     const o=document.createElement('option');o.value=it.id;sel.append(o);
     const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):'';
     const b=chip('',it.id);b.classList.add('catalog-size-chip');
-    const title=document.createElement('span');title.className='catalog-size-title';title.textContent=(activeProduct==='lit'||activeProduct==='tv'||activeProduct==='frigo'||activeProduct==='autre_electro')?it.label_fr.replace(/^.*?—\s*/, ''):size||baseLabelFor(it);b.append(title);
+    const title=document.createElement('span');title.className='catalog-size-title';title.textContent=(activeProduct==='lit'||activeProduct==='tv'||activeProduct==='frigo'||activeProduct==='autre_electro'||activeProduct==='seche_linge')?it.label_fr.replace(/^.*?—\s*/, ''):size||baseLabelFor(it);b.append(title);
     const price=document.createElement('span');price.className='catalog-size-price';price.textContent=new Intl.NumberFormat(L()==='en'?'en-US':L(),{style:'currency',currency:'EUR'}).format(Number(it.price_eur));b.append(price);
     chips.append(b);
    });
