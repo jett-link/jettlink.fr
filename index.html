@@ -565,7 +565,7 @@ html{scroll-padding-top:98px}
 <div class="field-group"><label data-t="accountPhone" for="account-phone">Téléphone *</label><input autocomplete="tel" id="account-phone" maxlength="50" name="phone" placeholder="Ex. +594 694 00 00 00" required="" type="tel"/></div>
 <div class="field-group"><label data-t="postalAddress" for="account-address">Adresse postale *</label><input autocomplete="street-address" data-ph="postalAddressPh" id="account-address" maxlength="300" minlength="5" name="address" placeholder="Ex. 12 rue des Palmiers, 97300 Cayenne" required="" type="text"/></div><div class="field-group"><label data-t="accountEmail" for="account-email">Adresse e-mail *</label><input autocomplete="email" id="account-email" maxlength="254" name="email" placeholder="vous@exemple.fr" required="" type="email"/><div class="field-group"><label for="account-password">Mot de passe *</label><input id="account-password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 caractères minimum"/></div></div>
 <label class="account-consent"><input id="account-consent" name="consent" required="" type="checkbox"/><span data-t="accountConsent">J'autorise JETT LINK à traiter mes coordonnées pour créer mon compte.</span></label>
-<button class="btn btn-primary account-submit" id="account-submit" type="submit"><span data-t="accountSubmit">Créer mon compte</span><span aria-hidden="true">↗</span></button>
+<button id="account-submit" type="submit" hidden aria-hidden="true" tabindex="-1">Valider</button>
 <p class="account-helper">Un e-mail de confirmation peut être nécessaire pour activer votre compte.</p>
 </form>
 </div>
@@ -1438,6 +1438,9 @@ html{scroll-padding-top:98px}
     document.querySelectorAll('[data-account-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
     message('');
   }));
+  document.querySelector('[data-account-mode="signup"]')?.addEventListener('click',()=>{
+    if(!$('account-request-form').hidden)root.requestSubmit();
+  });
   $('account-logout')?.addEventListener('click',async()=>{
     if(session?.access_token)authCall('logout',null,'POST',session.access_token).catch(()=>{});
     session=null;try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem(STORE);}catch{}
