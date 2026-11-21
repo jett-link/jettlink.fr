@@ -558,15 +558,15 @@ html{scroll-padding-top:98px}
 
 <div class="account-widget">
 <div class="account-widget-head"><span aria-hidden="true" class="account-widget-icon">↗</span><div><strong data-t="accountFormTitle">Créer mon compte</strong><small data-t="accountFormSubtitle">Vos informations sont enregistrées en toute sécurité.</small></div></div>
-<div id="account-anonymous">
-<form id="account-request-form" novalidate="">
+<div id="account-anonymous"><div class="account-mode-buttons" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px"><button type="button" class="btn btn-primary" data-account-mode="signup" aria-pressed="true">Créer un compte</button><button type="button" class="btn btn-outline" data-account-mode="login" aria-pressed="false">Se connecter</button></div><form id="account-login-form" hidden><div class="field-group"><label for="account-login-email">Adresse e-mail</label><input id="account-login-email" type="email" autocomplete="email" maxlength="254" required placeholder="vous@exemple.fr"></div><button id="account-login-submit" class="btn btn-primary" type="submit">Recevoir mon lien de connexion</button><p class="account-helper">Un lien sécurisé sera envoyé à votre adresse e-mail pour accéder à votre compte.</p></form>
+<form id="account-request-form">
 <div class="field-group"><label data-t="firstName" for="account-firstname">Prénom *</label><input autocomplete="given-name" data-ph="firstNamePh" id="account-firstname" maxlength="60" name="first_name" placeholder="Ex. Marie" required="" type="text"/></div><div class="field-group"><label data-t="lastName" for="account-lastname">Nom *</label><input autocomplete="family-name" data-ph="lastNamePh" id="account-lastname" maxlength="60" name="last_name" placeholder="Ex. Dupont" required="" type="text"/></div>
 
 <div class="field-group"><label data-t="accountPhone" for="account-phone">Téléphone *</label><input autocomplete="tel" id="account-phone" maxlength="50" name="phone" placeholder="Ex. +594 694 00 00 00" required="" type="tel"/></div>
-<div class="field-group"><label data-t="postalAddress" for="account-address">Adresse postale *</label><input autocomplete="street-address" data-ph="postalAddressPh" id="account-address" maxlength="300" minlength="5" name="address" placeholder="Ex. 12 rue des Palmiers, 97300 Cayenne" required="" type="text"/></div><div class="field-group"><label data-t="accountEmail" for="account-email">Adresse e-mail *</label><input autocomplete="email" id="account-email" maxlength="254" name="email" placeholder="vous@exemple.fr" required="" type="email"/></div>
+<div class="field-group"><label data-t="postalAddress" for="account-address">Adresse postale *</label><input autocomplete="street-address" data-ph="postalAddressPh" id="account-address" maxlength="300" minlength="5" name="address" placeholder="Ex. 12 rue des Palmiers, 97300 Cayenne" required="" type="text"/></div><div class="field-group"><label data-t="accountEmail" for="account-email">Adresse e-mail *</label><input autocomplete="email" id="account-email" maxlength="254" name="email" placeholder="vous@exemple.fr" required="" type="email"/><div class="field-group"><label for="account-password">Mot de passe *</label><input id="account-password" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 caractères minimum"/></div></div>
 <label class="account-consent"><input id="account-consent" name="consent" required="" type="checkbox"/><span data-t="accountConsent">J'autorise JETT LINK à traiter mes coordonnées pour créer mon compte.</span></label>
 <button class="btn btn-primary account-submit" id="account-submit" type="submit"><span data-t="accountSubmit">Créer mon compte</span><span aria-hidden="true">↗</span></button>
-<p class="account-helper" data-t="accountHelper">Aucun mot de passe à retenir.</p>
+<p class="account-helper">Un e-mail de confirmation peut être nécessaire pour activer votre compte.</p>
 </form>
 </div>
 <p aria-live="polite" class="account-feedback" id="account-feedback" role="status"></p>
@@ -1365,35 +1365,82 @@ html{scroll-padding-top:98px}
     const payload={customer_email:current.email,seller_name:$('purchase-seller').value.trim(),item_name:$('purchase-item').value.trim(),category:$('purchase-category').value,quantity:Number($('purchase-quantity').value),size_code:$('purchase-size').value||null,model_reference:$('purchase-reference').value.trim()||null,product_url:url||null,photo_url:$('purchase-photo').value.trim()||null,notes:$('purchase-notes').value.trim()||null};
     try{const r=await fetch(SB_URL+'/rest/v1/purchase_declarations',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok)throw Error('Enregistrement impossible. Vérifiez les champs puis réessayez.');try{const key='jett-purchases-'+current.email,rows=JSON.parse(localStorage.getItem(key)||'[]');rows.unshift({...payload,created_at:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(rows.slice(0,100)));}catch{}form.reset();$('purchase-quantity').value='1';msg.textContent='Déclaration enregistrée.';loadPurchaseDeclarations(current.email);}catch(err){msg.textContent=err.message||t('generic');}finally{btn.disabled=false;}
   });
-  async function getAccount(){
-    try{const saved=JSON.parse(localStorage.getItem(STORE)||'null');
-      if(saved&&saved.email){render({authenticated:true,account:saved,shipments:[],orders:[],quotes:[]});return;}
-    }catch{}
-    render({authenticated:false});
+  const AUTH_KEY='jett-auth-session';
+  const authHeaders={'Content-Type':'application/json','apikey':SB_KEY};
+  let session=null;
+  function validEmail(email){return /^[^\\s@]+@[^\\s@]+\\.[A-Za-z]{2,}$/.test(email)&&!email.includes('..');}
+  function accountFromUser(user){
+    const m=user?.user_metadata||{};
+    return {name:[m.first_name,m.last_name].filter(Boolean).join(' ')||user.email.split('@')[0],email:user.email,phone:m.phone||'',address:m.address||''};
   }
-  async function post(name,data){
-    let response;
-    try{response=await fetch('api/'+name,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch{throw Error(t('needServer'));}
-    let result;try{result=await response.json();}catch{throw Error(t('needServer'));}
-    if(!response.ok||!result.ok)throw Error(result.error||t('generic'));
-    return result;
+  async function authCall(path,payload,method='POST',token){
+    const response=await fetch(SB_URL+'/auth/v1/'+path,{method,headers:{...authHeaders,...(token?{Authorization:'Bearer '+token}:{})},...(payload?{body:JSON.stringify(payload)}:{})});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(data.msg||data.error_description||data.message||'Service de connexion indisponible.');
+    return data;
+  }
+  function saveSession(data){
+    if(!data?.access_token||!data?.user)return false;
+    session={access_token:data.access_token,refresh_token:data.refresh_token,expires_at:Date.now()+(Number(data.expires_in)||3600)*1000,user:data.user};
+    try{localStorage.setItem(AUTH_KEY,JSON.stringify(session));localStorage.removeItem(STORE);}catch{}
+    render({authenticated:true,account:accountFromUser(data.user),shipments:[],orders:[],quotes:[]});
+    return true;
+  }
+  async function getAccount(){
+    const params=new URLSearchParams(location.hash.slice(1));
+    if(params.has('access_token')){
+      const data={access_token:params.get('access_token'),refresh_token:params.get('refresh_token'),expires_in:Number(params.get('expires_in')||3600)};
+      try{data.user=await authCall('user',null,'GET',data.access_token);saveSession(data);message('Adresse e-mail vérifiée. Vous êtes connecté.','ok');}
+      catch{message('Lien de connexion invalide ou expiré.','error');}
+      history.replaceState(null,'',location.pathname+location.search+'#inscription');return;
+    }
+    try{
+      const stored=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
+      if(stored?.access_token){
+        if(stored.expires_at<Date.now()+60000&&stored.refresh_token){
+          const refreshed=await authCall('token?grant_type=refresh_token',{refresh_token:stored.refresh_token});saveSession(refreshed);return;
+        }
+        const user=await authCall('user',null,'GET',stored.access_token);
+        saveSession({...stored,user,expires_in:Math.max(60,Math.floor((stored.expires_at-Date.now())/1000))});return;
+      }
+    }catch{try{localStorage.removeItem(AUTH_KEY);}catch{}}
+    render({authenticated:false});
   }
   root.addEventListener('submit',async e=>{
     e.preventDefault();if(!root.reportValidity())return;
-    submit.disabled=true;message(t('requesting'));
+    const email=$('account-email').value.trim().toLowerCase();
+    if(!validEmail(email)){message('Saisissez une adresse e-mail valide (exemple : nom@domaine.fr).','error');return;}
+    const password=$('account-password')?.value||'';
+    if(password.length<8){message('Le mot de passe doit contenir au moins 8 caractères.','error');return;}
+    submit.disabled=true;message('Création de votre compte…');
     try{
-      const f=$('account-firstname').value.trim(),l=$('account-lastname').value.trim(),email=$('account-email').value.trim(),phone=$('account-phone').value.trim(),address=$('account-address').value.trim();
-      let res;
-      try{res=await fetch(SB_URL+'/rest/v1/customers',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Prefer:'return=minimal'},body:JSON.stringify({first_name:f,last_name:l,email,phone,address})});}catch{throw Error(t('generic'));}
-      if(!res.ok&&res.status!==409)throw Error(t('generic'));
-      try{localStorage.setItem(STORE,JSON.stringify({name:(f+' '+l).trim(),email,phone,address}));}catch{}
-      render({authenticated:true,account:{name:(f+' '+l).trim(),email,phone,address},shipments:[],orders:[],quotes:[]});
-      message(res.status===409?'Ce compte existe déjà. Vous pouvez accéder à votre espace client.':'Votre compte JETT LINK a été créé avec succès ! Vos informations ont bien été enregistrées.','ok');
-    }catch(err){message(err.message||t('generic'),'error');}
+      const first_name=$('account-firstname').value.trim(),last_name=$('account-lastname').value.trim(),address=$('account-address').value.trim(),phone=$('account-phone').value.trim();
+      const result=await authCall('signup',{email,password,data:{first_name,last_name,address,phone},email_redirect_to:location.origin+location.pathname+'#inscription'});
+      if(result.access_token&&result.user){saveSession(result);message('Votre compte JETT LINK a bien été créé !','ok');}
+      else if(result.user){message('Inscription enregistrée. Consultez votre e-mail pour confirmer votre adresse et activer votre compte.','ok');}
+      else throw Error('La création du compte n’a pas pu être confirmée.');
+    }catch(err){message(err.message||'Création du compte impossible.','error');}
     finally{submit.disabled=false;}
   });
-  $('account-logout')?.addEventListener('click',()=>{
-    try{localStorage.removeItem(STORE);}catch{}
+  $('account-login-form')?.addEventListener('submit',async e=>{
+    e.preventDefault();const email=$('account-login-email').value.trim().toLowerCase();
+    if(!validEmail(email)){message('Saisissez une adresse e-mail valide.','error');return;}
+    const btn=$('account-login-submit');btn.disabled=true;message('Envoi du lien sécurisé…');
+    try{
+      await authCall('otp',{email,create_user:false,email_redirect_to:location.origin+location.pathname+'#inscription'});
+      message('Si ce compte existe, un lien de connexion vient d’être envoyé à cette adresse.','ok');
+    }catch(err){message(err.message||'Envoi impossible.','error');}
+    finally{btn.disabled=false;}
+  });
+  document.querySelectorAll('[data-account-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+    const login=btn.dataset.accountMode==='login';
+    $('account-request-form').hidden=login;$('account-login-form').hidden=!login;
+    document.querySelectorAll('[data-account-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+    message('');
+  }));
+  $('account-logout')?.addEventListener('click',async()=>{
+    if(session?.access_token)authCall('logout',null,'POST',session.access_token).catch(()=>{});
+    session=null;try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem(STORE);}catch{}
     render({authenticated:false});message(t('logout'),'ok');
   });
   window.addEventListener('jett:language',()=>{if(current){$('account-greeting').textContent=`${t('hi')} ${current.name.split(' ')[0]} !`;}});
