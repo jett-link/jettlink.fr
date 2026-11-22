@@ -1471,12 +1471,12 @@ html{scroll-padding-top:98px}
     const v=m.custom?label('quoteNeeded','Sur devis'):euro(m.cents);
     const a=$('price-amount'),c=$('price-caption'),b=$('tariff-band'),r=$('price-breakdown-base');
     if(a)a.textContent=v;if(c)c.textContent=T[0];if(b)b.textContent=m.count+' '+T[1];
-    if(r){r.textContent=v;const sp=r.previousElementSibling;if(sp)sp.textContent=T[2];}
+    if(r){const selected=compute();r.textContent=!selected.valid?'—':selected.requiresQuote?label('quoteNeeded','Sur devis'):euro(selected.priceCents);const sp=r.previousElementSibling;if(sp)sp.textContent=window.JettCatalogFixed?.label||'Prix de l’article sélectionné';}
   },summary(){if(!entries.length)return null;let cents=0,custom=false;entries.forEach(e=>{if(e.quote.requiresQuote)custom=true;else cents+=e.quote.priceCents;});return{cents,custom,count:entries.length};},get orderParcels(){return entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item}));},get parcels(){return multiPending?entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item})):[];},clear(){entries.length=0;multiPending=false;renderList();}};
   const label=(key,fallback)=>{const s=tr(key);return s===key?fallback:s;};
   function updateSummary(){
     const result=compute(),amount=$('price-breakdown-base');
-    if(amount&&!entries.length)amount.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
+    if(amount)amount.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
     const peek=$('mobile-peek-price');if(peek)peek.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
   }
   measures.forEach(k=>$(k)?.addEventListener('input',updateSummary));
