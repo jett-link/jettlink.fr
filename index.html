@@ -929,7 +929,7 @@ html{scroll-padding-top:98px}
  const number=(id)=>Number($(id).value);
  const weight=(value)=>new Intl.NumberFormat(window.JettI18n?.lang||'fr',{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)+' kg';
  const euro=(cents)=>new Intl.NumberFormat(window.JettI18n?.lang||'fr',{style:'currency',currency:'EUR'}).format(cents/100);
- const estimate=()=>price.estimate(Object.fromEntries(inputs.map(k=>[k,number(k)])));
+ const estimate=()=>{const base=price.estimate(Object.fromEntries(inputs.map(k=>[k,number(k)])));const fixed=window.JettCatalogFixed;return fixed?{...base,valid:true,requiresQuote:false,priceCents:fixed.priceCents}:base;};
  function refresh(){
    const result=estimate();latest=result.valid?result:null;
    $('calc-error').hidden=result.valid||inputs.every(id=>!$(id).value);
@@ -1470,7 +1470,7 @@ html{scroll-padding-top:98px}
     const L=window.JettI18n?.lang,T={fr:['TOTAL DE VOS COLIS','colis · chaque colis est facturé selon sa propre tranche de poids','Tarif de chaque colis (par tranche de poids)'],pt:['TOTAL DAS SUAS ENCOMENDAS','encomendas · cada uma é faturada pelo seu próprio escalão de peso','Tarifa de cada encomenda (por escalão de peso)']}[L]||['TOTAL OF YOUR PARCELS','parcels · each parcel is billed on its own weight tier','Rate of each parcel (by weight tier)'];
     const v=m.custom?label('quoteNeeded','Sur devis'):euro(m.cents);
     const a=$('price-amount'),c=$('price-caption'),b=$('tariff-band'),r=$('price-breakdown-base');
-    if(a)a.textContent=v;if(c)c.textContent=T[0];if(b)b.textContent=m.count+' '+T[1];
+    const selected=compute();if(a)a.textContent=!selected.valid?'—':selected.requiresQuote?label('quoteNeeded','Sur devis'):euro(selected.priceCents);if(c)c.textContent=window.JettCatalogFixed?'PRIX DE L’ARTICLE SÉLECTIONNÉ':'TARIF ESTIMÉ';if(b)b.textContent=window.JettCatalogFixed?.label||m.count+' article(s) déjà ajouté(s)';
     if(r){const selected=compute();r.textContent=!selected.valid?'—':selected.requiresQuote?label('quoteNeeded','Sur devis'):euro(selected.priceCents);const sp=r.previousElementSibling;if(sp)sp.textContent=window.JettCatalogFixed?.label||'Prix de l’article sélectionné';}
   },summary(){if(!entries.length)return null;let cents=0,custom=false;entries.forEach(e=>{if(e.quote.requiresQuote)custom=true;else cents+=e.quote.priceCents;});return{cents,custom,count:entries.length};},get orderParcels(){return entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item}));},get parcels(){return multiPending?entries.map(({weight,length,width,height,item})=>({weight,length,width,height,item})):[];},clear(){entries.length=0;multiPending=false;renderList();}};
   const label=(key,fallback)=>{const s=tr(key);return s===key?fallback:s;};
