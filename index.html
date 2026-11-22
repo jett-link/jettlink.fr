@@ -1368,7 +1368,7 @@ html{scroll-padding-top:98px}
   const AUTH_KEY='jett-auth-session';
   const authHeaders={'Content-Type':'application/json','apikey':SB_KEY};
   let session=null;
-  function validEmail(email){return /^[^\\s@]+@[^\\s@]+\\.[A-Za-z]{2,}$/.test(email)&&!email.includes('..');}
+  function validEmail(email){return /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)&&!email.includes('..');}
   function accountFromUser(user){
     const m=user?.user_metadata||{};
     return {name:[m.first_name,m.last_name].filter(Boolean).join(' ')||user.email.split('@')[0],email:user.email,phone:m.phone||'',address:m.address||''};
