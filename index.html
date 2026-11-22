@@ -1464,7 +1464,7 @@ html{scroll-padding-top:98px}
   const locale=()=>({fr:'fr-FR',en:'en-GB',nl:'nl-NL',mq:'fr-FR',sr:'nl-NL'}[window.JettI18n?.lang]||'fr-FR');
   const euro=cents=>new Intl.NumberFormat(locale(),{style:'currency',currency:'EUR'}).format(cents/100);
   const current=()=>Object.fromEntries(measures.map(k=>[k,Number($(k)?.value)]));
-  const compute=()=>pricing.estimate(current());
+  const compute=()=>{const fixed=window.JettCatalogFixed;return fixed?{...pricing.estimate(current()),valid:true,requiresQuote:false,priceCents:fixed.priceCents}:pricing.estimate(current());};
   const entries=[];
   let multiPending=false;
   const maxEntries=5;
@@ -1479,7 +1479,7 @@ html{scroll-padding-top:98px}
   const label=(key,fallback)=>{const s=tr(key);return s===key?fallback:s;};
   function updateSummary(){
     const result=compute(),amount=$('price-breakdown-base');
-    if(amount)amount.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
+    if(amount&&!entries.length)amount.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
     const peek=$('mobile-peek-price');if(peek)peek.textContent=!result.valid?'—':result.requiresQuote?label('quoteNeeded','Sur devis'):euro(result.priceCents);
   }
   measures.forEach(k=>$(k)?.addEventListener('input',updateSummary));
@@ -1513,6 +1513,7 @@ html{scroll-padding-top:98px}
     window.dispatchEvent(new Event('jett:multi'));$('weight')?.dispatchEvent(new Event('input',{bubbles:true}));
     if(request)request.disabled=!entries.length;
     if(add)add.disabled=entries.length>=maxEntries;
+    window.JettMultiQuote.paint();
   }
   add?.addEventListener('click',()=>{
     const quote=compute();
