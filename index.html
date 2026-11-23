@@ -1552,15 +1552,14 @@ html{scroll-padding-top:98px}
  const URL_='https://uysplffdmchiahewecds.supabase.co/functions/v1/create-checkout',KEY='sb_publishable_ky-VAWZ1vkRKfmPt7W3b_A_rII9fGw4';
  const say=m=>{try{window.JettUi?.showToast?window.JettUi.showToast(m):alert(m);}catch{alert(m);}};
  btn.addEventListener('click',async()=>{
-  if(window.JettDestination==='martinique'){say('Pour la Martinique, demandez un devis : le paiement en ligne sera activé après mise à jour du calcul serveur.');return;}
-  const mq=window.JettMultiQuote;let parcels=mq?.orderParcels||[];
+    const mq=window.JettMultiQuote;let parcels=mq?.orderParcels||[];
   if(!parcels.length)parcels=[{weight:Number($('weight').value),length:Number($('length').value),width:Number($('width').value),height:Number($('height').value),item:window.JettCatalogFixed?.id||null}];
   const email=window.JettAccount?.current?.email||'';
   if(!$('calculator-dimensions-consent')?.checked){say(window.JettI18n?.t('dimensionConsentRequired')||'Veuillez confirmer la vérification du poids et des dimensions avant de payer.');return;}
   if(!parcels.every(p=>[p.weight,p.length,p.width,p.height].every(n=>Number.isFinite(n)&&n>0))){say('Choisissez d’abord ce que vous envoyez, ou saisissez les mesures.');return;}
   const old=btn.firstElementChild.textContent;btn.disabled=true;btn.firstElementChild.textContent='…';
   try{
-   const r=await fetch(URL_,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({parcels,email,dimensions_confirmed:true})});
+   const r=await fetch(URL_,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({parcels,email,destination:window.JettDestination||'guyane',dimensions_confirmed:true})});
    const o=await r.json().catch(()=>({}));
    if(r.ok&&o.url){window.location.href=o.url;return;}
    say(o.error==='quote_required'?'Ce colis dépasse 300 kg facturables : demandez un devis.':o.error==='stripe_not_configured'?'Le paiement en ligne n’est pas encore activé. Demandez un devis ou contactez-nous.':'Paiement momentanément indisponible. Réessayez dans un instant.');
@@ -1589,7 +1588,9 @@ html{scroll-padding-top:98px}
  const norm=v=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[×]/g,'x').replace(/[^a-z0-9]+/g,' ').trim();
  const destination=()=>window.JettDestination||'guyane';
  const martPrice=it=>{
-  let name=norm(it.label_fr||'').replace(/ (petit|moyen|grand)$/,'');
+  let name=it.id==='lit_140'||it.id==='lit_160_medium'?it.id:(it.parent_item_id||it.id);
+  const keyMap={table_manger:'table de salle a manger',micro_onde:'micro ondes',frigo:'refrigerateur',congel_coffre:'congelateur coffre',lave_linge:'lave linge',seche_linge:'seche linge',autre_electro:'autre electromenager',deco:'decoration',canape_2:'canape 2 places',canape_3:'canape 3 places',lit_140:'lit 140 x 190',lit_160_medium:'lit 160 x 190',meuble_tv:'meuble tv'};
+  name=keyMap[name]||name.replace(/_/g,' ');
   if(name==='table a manger')name='table de salle a manger';
   if(name==='frigo')name='refrigerateur';
   if(name==='congelateur')name='congelateur coffre';
@@ -1605,7 +1606,7 @@ html{scroll-padding-top:98px}
    document.querySelectorAll('#jett-destination button').forEach(b=>{const on=b===btn;b.setAttribute('aria-pressed',String(on));b.classList.toggle('btn-primary',on);b.classList.toggle('btn-outline',!on);});
    document.getElementById('jett-destination-note').textContent=destination()==='martinique'?'Tarifs Martinique : transport et provisions fiscales inclus. Prix final après vérification.':'Tarifs Guyane';
    window.JettMultiQuote?.clear?.();build();apply();
-   const pay=document.getElementById('stripe-direct');if(pay)pay.hidden=destination()==='martinique';
+   const pay=document.getElementById('stripe-direct');if(pay)pay.hidden=false;
    document.getElementById('quote-link')?.removeAttribute('hidden');
  }));
  const TX={"fr":{"label":"Qu’est-ce que vous avez acheté ?","other":"Téléphone ou autre colis — saisir les dimensions","kit":"Meubles en kit","electro":"Électroménager et TV","canape":"Canapés","vetements":"Vêtements","accessoires":"Accessoires","deco":"Décoration","autre_electro":"Autre appareil électroménager","note":"Dimensions et poids estimatifs : {d}. Prix indicatif du format.","fixed":"Prix estimé :","line":"Prix de votre article"},"en":{"label":"What did you buy?","other":"Other parcel (enter measurements)","kit":"Flat-pack furniture","electro":"Appliances and TVs","canape":"Sofas","vetements":"Clothing","accessoires":"Accessories","deco":"Home decor","autre_electro":"Other household appliance","note":"Estimated size and weight: {d}. Indicative format price.","fixed":"Estimated price:","line":"Item price"},"nl":{"label":"Wat heeft u gekocht?","other":"Ander pakket (maten invullen)","kit":"Meubels in kit","electro":"Huishoudapparaten en tv’s","canape":"Banken","vetements":"Kleding","accessoires":"Accessoires","deco":"Decoratie","autre_electro":"Ander huishoudelijk apparaat","note":"Geschatte afmetingen en gewicht: {d}. Richtprijs.","fixed":"Geschatte prijs:","line":"Prijs van uw artikel"},"pt":{"label":"O que comprou?","other":"Outra encomenda (indique as medidas)","kit":"Móveis em kit","electro":"Eletrodomésticos e TV","canape":"Sofás","vetements":"Vestuário","accessoires":"Acessórios","deco":"Decoração","autre_electro":"Outro eletrodoméstico","note":"Dimensões e peso estimados: {d}. Preço indicativo.","fixed":"Preço estimado:","line":"Preço do artigo"}};
@@ -1647,7 +1648,7 @@ html{scroll-padding-top:98px}
     const size=it.size_code?({small:'Petit',medium:'Moyen',large:'Grand'}[it.size_code]||it.size_code):'';
     const b=chip('',it.id);b.classList.add('catalog-size-chip');
     const title=document.createElement('span');title.className='catalog-size-title';title.textContent=(activeProduct==='lit'||activeProduct==='tv'||activeProduct==='frigo'||activeProduct==='autre_electro'||activeProduct==='seche_linge')?it.label_fr.replace(/^.*?—\s*/, ''):size||baseLabelFor(it);b.append(title);
-    const price=document.createElement('span');price.className='catalog-size-price';price.textContent=new Intl.NumberFormat(L()==='en'?'en-US':L(),{style:'currency',currency:'EUR'}).format((destination()==='martinique'?martPrice(it):Number(it.price_eur))??0);b.append(price);
+    const price=document.createElement('span');price.className='catalog-size-price';const listed=destination()==='martinique'?martPrice(it):Number(it.price_eur);price.textContent=listed==null?'Sur devis':new Intl.NumberFormat(L()==='en'?'en-US':L(),{style:'currency',currency:'EUR'}).format(listed);b.append(price);
     chips.append(b);
    });
   }
@@ -1662,11 +1663,12 @@ html{scroll-padding-top:98px}
   const it=items.find(i=>i.id===sel.value),note=$('catalog-note');
   chips.querySelectorAll('.catalog-size-chip,.catalog-other-chip').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.id===sel.value&&sel.value!=='')));
   if(!it){window.JettCatalogFixed=null;document.body.classList.remove('catalog-mode');if(note)note.textContent='';fire();return;}
-  window.JettCatalogFixed={id:it.id,label:cleanProductName(lab(it)),priceCents:Math.round((destination()==='martinique'?(martPrice(it)??Number(it.price_eur)):Number(it.price_eur))*100)};
+  const currentPrice=destination()==='martinique'?martPrice(it):Number(it.price_eur);
+  window.JettCatalogFixed=currentPrice==null?null:{id:it.id,label:cleanProductName(lab(it)),priceCents:Math.round(currentPrice*100)};
   document.body.classList.add('catalog-mode');
   [['weight',it.std_weight_kg],['length',it.std_length_cm],['width',it.std_width_cm],['height',it.std_height_cm]].forEach(([k,v])=>{const el=$(k);if(el)el.value=Number(v);});
   fire();
-  if(note)note.textContent=cleanProductName(lab(it))+' — '+tx('note').replace('{d}',dims(it));
+  if(note)note.textContent=cleanProductName(lab(it))+' — '+(currentPrice==null?'Tarif sur devis : paiement en ligne indisponible pour cet article.':tx('note').replace('{d}',dims(it)));
  }
  window.JettCatalog={fixedText:()=>window.JettCatalogFixed?tx('fixed')+' '+window.JettCatalogFixed.label:'',lineText:()=>window.JettCatalogFixed?tx('line'):''};
  const resetToOther=()=>{if(sel.value!==''){sel.value='';apply();}};
