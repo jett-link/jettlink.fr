@@ -1552,7 +1552,8 @@ html{scroll-padding-top:98px}
  const URL_='https://uysplffdmchiahewecds.supabase.co/functions/v1/create-checkout',KEY='sb_publishable_ky-VAWZ1vkRKfmPt7W3b_A_rII9fGw4';
  const say=m=>{try{window.JettUi?.showToast?window.JettUi.showToast(m):alert(m);}catch{alert(m);}};
  btn.addEventListener('click',async()=>{
-  if(window.JettDestination==='martinique'){say('Pour la Martinique, demandez un devis : le paiement en ligne sera activé après mise à jour du calcul serveur.');return;}\n  const mq=window.JettMultiQuote;let parcels=mq?.orderParcels||[];
+  if(window.JettDestination==='martinique'){say('Pour la Martinique, demandez un devis : le paiement en ligne sera activé après mise à jour du calcul serveur.');return;}
+  const mq=window.JettMultiQuote;let parcels=mq?.orderParcels||[];
   if(!parcels.length)parcels=[{weight:Number($('weight').value),length:Number($('length').value),width:Number($('width').value),height:Number($('height').value),item:window.JettCatalogFixed?.id||null}];
   const email=window.JettAccount?.current?.email||'';
   if(!$('calculator-dimensions-consent')?.checked){say(window.JettI18n?.t('dimensionConsentRequired')||'Veuillez confirmer la vérification du poids et des dimensions avant de payer.');return;}
