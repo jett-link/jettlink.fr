@@ -1400,7 +1400,17 @@ html{scroll-padding-top:98px}
         const user=await authCall('user',null,'GET',stored.access_token);
         saveSession({...stored,user,expires_in:Math.max(60,Math.floor((stored.expires_at-Date.now())/1000))});return;
       }
-    }catch{try{localStorage.removeItem(AUTH_KEY);}catch{}}
+    }catch(err){
+      // Preserve a previously authenticated session during transient network failures.
+      // Only discard credentials when Supabase explicitly rejects the token.
+      const stored=(()=>{try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null');}catch{return null;}})();
+      if(stored?.user?.email){
+        session=stored;
+        render({authenticated:true,account:accountFromUser(stored.user),shipments:[],orders:[],quotes:[]});
+        message('Connexion restaurée. Vérification du serveur momentanément indisponible.','ok');
+        return;
+      }
+    }
     render({authenticated:false});
   }
   root.addEventListener('submit',async e=>{
