@@ -1412,7 +1412,7 @@ html{scroll-padding-top:98px}
     submit.disabled=true;message('Création de votre compte…');
     try{
       const first_name=$('account-firstname').value.trim(),last_name=$('account-lastname').value.trim(),address=$('account-address').value.trim(),phone=$('account-phone').value.trim();
-      const result=await authCall('signup',{email,password,data:{first_name,last_name,address,phone},email_redirect_to:location.origin+location.pathname+'#inscription'});
+      const result=await authCall('signup?redirect_to='+encodeURIComponent('https://jett-link.fr/#inscription'),{email,password,data:{first_name,last_name,address,phone}});
       if(result.access_token&&result.user){saveSession(result);message('Votre compte JETT LINK a bien été créé !','ok');}
       else if(result.user){message('Inscription enregistrée. Consultez votre e-mail pour confirmer votre adresse et activer votre compte.','ok');}
       else throw Error('La création du compte n’a pas pu être confirmée.');
@@ -1424,7 +1424,7 @@ html{scroll-padding-top:98px}
     if(!validEmail(email)){message('Saisissez une adresse e-mail valide.','error');return;}
     const btn=$('account-login-submit');btn.disabled=true;message('Envoi du lien sécurisé…');
     try{
-      await authCall('otp',{email,create_user:false,email_redirect_to:location.origin+location.pathname+'#inscription'});
+      await authCall('otp?redirect_to='+encodeURIComponent('https://jett-link.fr/#inscription'),{email,create_user:false});
       message('Si ce compte existe, un lien de connexion vient d’être envoyé à cette adresse.','ok');
     }catch(err){message(err.message||'Envoi impossible.','error');}
     finally{btn.disabled=false;}
