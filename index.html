@@ -1763,7 +1763,16 @@ $('purchase-declaration-form').addEventListener('submit',e=>{
  const details='Pièce automobile : '+$('auto-piece').value+' | Famille : '+$('auto-family').value+' | Véhicule : '+$('auto-brand').value+' '+$('auto-model').value+' ('+$('auto-year').value+') | Motorisation : '+($('auto-engine').value||'non précisée')+' | Référence/lien : '+($('auto-ref').value||'non précisé')+' | Poids estimé : '+($('auto-weight-range').selectedOptions[0]?.textContent||'non précisé')+' | Déclaré sans liquide.';
  const prefix='[AUTO] '; const original=item.value.replace(/\n?\[AUTO\] [^\n]*/g,'').trim();item.value=(original?original+'\n':'')+prefix+details;
 },true);
-window.JettAutoPartsOpen=function(){category.value='pieces_auto';category.dispatchEvent(new Event('change',{bubbles:true}));$('purchase-declaration-form').scrollIntoView({behavior:'smooth',block:'start'});$('auto-brand').focus({preventScroll:true});};
+window.JettAutoPartsOpen=function(){
+ const section=$('calculator-purchase-declaration');
+ if(section)section.hidden=false;
+ category.value='pieces_auto';category.dispatchEvent(new Event('change',{bubbles:true}));
+ let notice=$('auto-account-notice');
+ if(!notice&&section){notice=document.createElement('p');notice.id='auto-account-notice';notice.style.cssText='padding:12px 14px;background:#edf5fb;border-radius:8px;font-size:14px;line-height:1.5';section.insertBefore(notice,section.querySelector('form'));}
+ if(notice)notice.textContent='Vous pouvez consulter les tarifs et remplir les caractéristiques de votre pièce. La connexion à votre compte JETT LINK est nécessaire pour enregistrer la déclaration.';
+ section?.scrollIntoView({behavior:'smooth',block:'start'});
+ setTimeout(()=>{$('auto-brand')?.focus({preventScroll:true});},250);
+};
 })();
 </script></body>
 </html>
