@@ -606,7 +606,7 @@ html{scroll-padding-top:98px}
 <div class="field-group"><label for="purchase-category">Catégorie *</label><select id="purchase-category" required><option value="">Choisir…</option><option value="kit">Meubles en kit</option><option value="electro">Électroménager et TV</option><option value="autre_electro">Autre appareil électroménager</option><option value="canape">Canapés</option><option value="vetements">Vêtements</option><option value="accessoires">Accessoires</option><option value="deco">Décoration</option><option value="autre">Autre</option></select></div>
 <div class="field-group"><label for="purchase-size">Format</label><select id="purchase-size"><option value="">Non précisé</option><option value="small">Petit</option><option value="medium">Moyen</option><option value="large">Grand</option><option value="natural">Format spécifique</option></select></div></div>
 <div class="field-group"><label for="purchase-quantity">Quantité *</label><input id="purchase-quantity" type="number" min="1" max="100" value="1" required></div>
-<div class="field-group"><label for="purchase-invoice">Joindre ma facture (facultatif)</label><input id="purchase-invoice" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"><small>Formats acceptés : PDF, JPG, PNG ou WebP · 10 Mo maximum. Votre facture reste privée.</small></div>
+<div class="field-group"><label for="purchase-invoice">Joindre ma facture *</label><input id="purchase-invoice" type="file" required accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"><small>Formats acceptés : PDF, JPG, PNG ou WebP · 10 Mo maximum. Facture obligatoire pour enregistrer votre déclaration. Votre facture reste privée.</small></div>
 <div class="field-group"><label for="purchase-notes">Précisions (facultatif)</label><textarea id="purchase-notes" rows="3" maxlength="1000"></textarea></div>
 <button class="btn btn-primary" id="purchase-submit" type="submit">Enregistrer ma déclaration</button>
 <p id="purchase-feedback" class="account-feedback" role="status" aria-live="polite"></p>
@@ -1364,6 +1364,7 @@ html{scroll-padding-top:98px}
     try{
       const invoice=$('purchase-invoice').files[0];
       let accessToken=session?.access_token;
+      if(!invoice)throw Error('Veuillez joindre votre facture pour déclarer vos achats.');
       if(invoice){
         const types={'application/pdf':'pdf','image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
         const ext=types[invoice.type];
