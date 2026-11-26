@@ -23,7 +23,7 @@
  <div class="eyebrow">ACCÈS SÉCURISÉ</div><h1>Administration</h1>
  <p>Connecte-toi avec l’adresse e-mail autorisée pour gérer les clients et les colis JETT LINK.</p>
  <form id="loginForm">
-  <div class="field"><label for="email">Adresse e-mail administrateur</label><input id="email" type="email" value="jettlink@yahoo.com" autocomplete="email" required></div>
+  <div class="field"><label for="email">Adresse e-mail administrateur</label><input id="email" type="email" autocomplete="email" required></div>
   <button class="btn blue" type="submit" style="width:100%">Recevoir mon lien de connexion</button>
  </form>
  <div id="loginMsg" class="note" aria-live="polite"></div>
@@ -125,9 +125,11 @@
   $('loginMsg').textContent=error?'Erreur : '+error.message:'Lien envoyé. Consulte la boîte de réception Yahoo (et les courriers indésirables).';
  });
  async function guard(){
-  const {data:{session}}=await supabase.auth.getSession();
-  if(!session){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');return}
-  const email=(session.user.email||'').toLowerCase();
+  // Never authorize the administration from locally cached session metadata alone.
+  // getUser validates the access token with Supabase Auth on every guard check.
+  const {data:{user},error}=await supabase.auth.getUser();
+  if(error||!user){$('loginView').classList.remove('hidden');$('appView').classList.add('hidden');$('logout').classList.add('hidden');return}
+  const email=(user.email||'').toLowerCase();
   if(email!==ADMIN_EMAIL){await supabase.auth.signOut();$('loginMsg').textContent='Accès refusé : adresse non autorisée.';$('loginView').classList.remove('hidden');return}
   $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');$('logout').classList.remove('hidden');$('who').textContent=email;
   await loadData();
