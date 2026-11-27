@@ -597,8 +597,9 @@ html{scroll-padding-top:98px}
 <div class="multi-actions"><button class="btn btn-outline" id="multi-add" type="button"><span data-t="multiAdd">Ajouter un article</span><span aria-hidden="true">＋</span></button><button class="btn btn-primary" id="multi-request" type="button"><span data-t="multiRequest">Demander un devis multi-colis</span><span aria-hidden="true">↗</span></button></div>
 <small class="multi-legal" data-t="multiLegal">Simulation non contractuelle : tarifs par colis, hors remise, taxes, stockage et frais éventuels. Aucun paiement groupé n'est proposé ici.</small>
 </div></details>
-</div><div class="wrap"><div class="account-history" id="calculator-purchase-declaration" style="margin-top:28px" hidden>
+</div><div class="wrap"><div class="account-history" id="calculator-purchase-declaration" style="margin-top:28px">
 <h3>Déclarer mes achats</h3>
+<p id="purchase-login-notice" class="account-profile" hidden>Pour envoyer votre déclaration, <a href="#inscription">connectez-vous à votre espace client</a>. Vous pouvez consulter le formulaire avant de vous connecter.</p>
 <p class="account-profile">Indiquez où vous avez acheté vos articles et ce que vous attendez. Les dimensions affichées sont indicatives ; le colis sera mesuré à sa réception.</p>
 <form id="purchase-declaration-form" class="purchase-declaration-form">
 <div class="field-group"><label for="purchase-seller">Site marchand / vendeur *</label><input id="purchase-seller" maxlength="180" required placeholder="Ex. : boutique en ligne, vendeur…"></div>
@@ -1323,7 +1324,7 @@ html{scroll-padding-top:98px}
   function publish(user){current=user;window.dispatchEvent(new CustomEvent('jett:account',{detail:{account:user}}));}
   function render(data){
     const on=!!data?.authenticated;
-    anonymous.hidden=on;authenticated.hidden=!on;const purchaseSection=$('calculator-purchase-declaration');if(purchaseSection)purchaseSection.hidden=!on;
+    anonymous.hidden=on;authenticated.hidden=!on;const purchaseNotice=$('purchase-login-notice');if(purchaseNotice)purchaseNotice.hidden=on;
     if(!on){publish(null);const nav=$('account-nav');if(nav)nav.textContent=(lang()==='en'?'Register':lang()==='nl'?'Registreren':'Inscription');return;}
     const a=data.account;
     $('account-greeting').textContent=`${t('hi')} ${a.name.split(' ')[0]} !`;
